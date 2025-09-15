@@ -20,6 +20,9 @@ var current_mode: PlayerMode = PlayerMode.MOVE
 # Shooting indicator for attack mode
 var shooting_indicator: ShootingIndicator
 
+# Mode icon display
+var mode_icon: Node2D
+
 var preview_visible: bool = false
 var preview_confirmed: bool = false
 var preview_x: int = 0
@@ -50,6 +53,9 @@ func _ready() -> void:
 	shooting_indicator.setup(player_id)
 	shooting_indicator.position = position
 	get_parent().add_child(shooting_indicator)
+
+	# Create mode icon
+	create_mode_icon()
 
 	# Connect to input manager signals
 	var input_manager = get_node("../../InputManager")
@@ -262,6 +268,9 @@ func _on_mode_switched(player_id_signal: int) -> void:
 	print("Player ", player_id, " switched to mode: ", PlayerMode.keys()[current_mode])
 	player_mode_changed.emit(player_id, current_mode)
 
+	# Update the mode icon
+	update_mode_icon()
+
 func get_current_mode() -> PlayerMode:
 	return current_mode
 
@@ -273,3 +282,51 @@ func get_mode_name() -> String:
 			return "Attack"
 		_:
 			return "Unknown"
+
+func create_mode_icon() -> void:
+	mode_icon = Node2D.new()
+	mode_icon.position = Vector2(0, 12)  # Position below the player
+	add_child(mode_icon)
+	update_mode_icon()
+
+func update_mode_icon() -> void:
+	if not mode_icon:
+		return
+
+	# Clear existing children
+	for child in mode_icon.get_children():
+		child.queue_free()
+
+	match current_mode:
+		PlayerMode.MOVE:
+			create_shoe_icon()
+		PlayerMode.ATTACK:
+			create_gun_icon()
+
+func create_shoe_icon() -> void:
+	# Create a simple shoe representation using rectangles with green
+	var shoe_bg = ColorRect.new()
+	shoe_bg.size = Vector2(8, 4)
+	shoe_bg.position = Vector2(-4, -2)
+	shoe_bg.color = Color.GREEN
+	mode_icon.add_child(shoe_bg)
+
+	var shoe_sole = ColorRect.new()
+	shoe_sole.size = Vector2(10, 2)
+	shoe_sole.position = Vector2(-5, 0)
+	shoe_sole.color = Color.DARK_GREEN
+	mode_icon.add_child(shoe_sole)
+
+func create_gun_icon() -> void:
+	# Create a simple gun representation using rectangles with red
+	var gun_barrel = ColorRect.new()
+	gun_barrel.size = Vector2(6, 2)
+	gun_barrel.position = Vector2(-3, -1)
+	gun_barrel.color = Color.RED
+	mode_icon.add_child(gun_barrel)
+
+	var gun_grip = ColorRect.new()
+	gun_grip.size = Vector2(3, 4)
+	gun_grip.position = Vector2(-5, -1)
+	gun_grip.color = Color.DARK_RED
+	mode_icon.add_child(gun_grip)
