@@ -5,11 +5,13 @@ var board_tiles: Array[Array] = []
 var tile_scene: PackedScene = preload("res://scenes/board/BoardTile.tscn")
 var player_scene: PackedScene = preload("res://scenes/player/Player.tscn")
 var player
+var player2
 
 func _ready() -> void:
 	init_board()
 	center_board()
 	spawn_player()
+	spawn_player2()
 
 func init_board():
 	for x in BOARD_SIZE:
@@ -29,3 +31,8 @@ func spawn_player() -> void:
 	player = player_scene.instantiate()
 	player.setup(2, 6)
 	add_child(player)
+
+func spawn_player2() -> void:
+	player2 = player_scene.instantiate()
+	player2.setup(5, 6)
+	add_child(player2)
