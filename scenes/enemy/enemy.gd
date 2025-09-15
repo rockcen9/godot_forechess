@@ -10,10 +10,15 @@ var max_health: int = 100
 # AI target selection
 var target_player_id: int = 0  # 0 means no target selected yet
 var planned_move_direction: Vector2i = Vector2i.ZERO
+var target_location: Vector2i = Vector2i.ZERO  # The location enemy plans to move to
 
 # Health bar display
 var health_bar_bg: ColorRect
 var health_bar_fg: ColorRect
+
+# Target visualization
+var target_gizmo: Node2D
+var gizmo_visible: bool = false
 
 func setup(x: int, y: int, id: int) -> void:
 	grid_x = x
@@ -25,6 +30,7 @@ func setup(x: int, y: int, id: int) -> void:
 
 func _ready() -> void:
 	create_health_bar()
+	create_target_gizmo()
 
 func create_health_bar() -> void:
 	# Create health bar background
@@ -98,6 +104,7 @@ func make_decision(board_manager: Node2D) -> void:
 	if not target_player:
 		print("Enemy ", enemy_id, " target player ", target_player_id, " not found")
 		planned_move_direction = Vector2i.ZERO
+		target_location = Vector2i(grid_x, grid_y)  # Stay in place
 		return
 
 	# Calculate direction to move toward target player
@@ -105,7 +112,19 @@ func make_decision(board_manager: Node2D) -> void:
 	var current_pos = Vector2i(grid_x, grid_y)
 
 	planned_move_direction = calculate_move_direction(current_pos, target_pos)
+
+	# Calculate target location (where enemy will move to)
+	target_location = current_pos + planned_move_direction
+
+	# Ensure target location is within bounds
+	target_location.x = clamp(target_location.x, 0, 7)
+	target_location.y = clamp(target_location.y, 0, 7)
+
 	print("Enemy ", enemy_id, " planned move direction: ", planned_move_direction)
+	print("Enemy ", enemy_id, " target location: ", target_location)
+
+	# Show the target gizmo
+	show_target_gizmo()
 
 func calculate_move_direction(from: Vector2i, to: Vector2i) -> Vector2i:
 	# Calculate the difference
@@ -147,9 +166,57 @@ func execute_planned_move(board_manager: Node2D) -> bool:
 	move_to(new_x, new_y)
 	print("Enemy ", enemy_id, " moved to (", new_x, ", ", new_y, ")")
 
-	# Clear planned move
+	# Clear planned move and hide gizmo
 	planned_move_direction = Vector2i.ZERO
+	hide_target_gizmo()
 	return true
 
 func get_target_player_id() -> int:
 	return target_player_id
+
+func get_target_location() -> Vector2i:
+	return target_location
+
+func create_target_gizmo() -> void:
+	target_gizmo = Node2D.new()
+	target_gizmo.name = "TargetGizmo"
+	add_child(target_gizmo)
+	target_gizmo.visible = false
+
+func _draw() -> void:
+	if gizmo_visible and target_gizmo:
+		# Calculate the world position of the target location
+		var target_world_pos = Vector2(target_location.x * 20 + 10, target_location.y * 20 + 10)
+		var current_world_pos = Vector2(grid_x * 20 + 10, grid_y * 20 + 10)
+
+		# Convert to local coordinates relative to enemy position
+		var target_local_pos = target_world_pos - current_world_pos
+
+		# Draw a circle at the target location
+		draw_circle(target_local_pos, 8, Color.RED, false, 2.0)
+
+		# Draw an arrow pointing to the target
+		if target_local_pos.length() > 0:
+			var direction = target_local_pos.normalized()
+			var arrow_start = direction * 12
+			var arrow_end = target_local_pos - direction * 8
+
+			# Draw the arrow line
+			draw_line(arrow_start, arrow_end, Color.RED, 2.0)
+
+			# Draw arrowhead
+			var arrowhead_size = 4
+			var arrowhead_angle = PI / 6  # 30 degrees
+			var arrowhead1 = arrow_end - direction.rotated(arrowhead_angle) * arrowhead_size
+			var arrowhead2 = arrow_end - direction.rotated(-arrowhead_angle) * arrowhead_size
+
+			draw_line(arrow_end, arrowhead1, Color.RED, 2.0)
+			draw_line(arrow_end, arrowhead2, Color.RED, 2.0)
+
+func show_target_gizmo() -> void:
+	gizmo_visible = true
+	queue_redraw()
+
+func hide_target_gizmo() -> void:
+	gizmo_visible = false
+	queue_redraw()
