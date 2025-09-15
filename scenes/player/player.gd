@@ -58,6 +58,11 @@ func _on_direction_changed(player_id_signal: int, direction: Vector2i) -> void:
 	if preview_confirmed:
 		return
 
+	# Don't show preview in attack mode
+	if current_mode == PlayerMode.ATTACK:
+		hide_preview()
+		return
+
 	# Only show preview during decision phase
 	var game_manager = get_node("../../GameManager")
 	if not game_manager or not game_manager.is_decision_phase():
@@ -80,6 +85,11 @@ func _on_direction_changed(player_id_signal: int, direction: Vector2i) -> void:
 
 func _on_player_confirmed(player_id_signal: int) -> void:
 	if player_id_signal != player_id:
+		return
+
+	# Don't allow confirmations in attack mode
+	if current_mode == PlayerMode.ATTACK:
+		print("Player ", player_id, " confirmation rejected - in attack mode")
 		return
 
 	# Don't allow multiple confirmations
@@ -183,11 +193,11 @@ func _on_mode_switched(player_id_signal: int) -> void:
 	# Switch between MOVE and ATTACK modes
 	if current_mode == PlayerMode.MOVE:
 		current_mode = PlayerMode.ATTACK
-		# Clear confirmed state when switching to attack mode
-		if preview_confirmed:
+		# Clear confirmed state and hide any preview when switching to attack mode
+		if preview_confirmed or preview_visible:
 			preview_confirmed = false
 			hide_preview()
-			print("Player ", player_id, " switched to Attack mode - cleared confirmed state")
+			print("Player ", player_id, " switched to Attack mode - cleared preview state")
 	else:
 		current_mode = PlayerMode.MOVE
 
