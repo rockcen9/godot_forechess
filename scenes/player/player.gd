@@ -9,4 +9,4 @@ func setup(x: int, y: int) -> void:
 	grid_y = y
 
 	# Set position based on grid coordinates (following BoardTile pattern)
-	position = Vector2(x * 64, y * 64)
+	position = Vector2(x * 20, y * 20)

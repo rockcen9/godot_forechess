@@ -22,7 +22,7 @@ func init_board():
 
 func center_board() -> void:
 	var screen_size = get_viewport().get_visible_rect().size
-	var board_pixel_size = BOARD_SIZE * 64  # 64 pixels per tile
+	var board_pixel_size = BOARD_SIZE * 20  # 20 pixels per tile
 	var center_offset = (screen_size - Vector2(board_pixel_size, board_pixel_size)) / 2
 	position = center_offset
 
