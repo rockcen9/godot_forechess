@@ -1,14 +1,18 @@
 extends Node
 
 enum TurnPhase {
+	ENEMY_DECISION,
 	PLAYER_DECISION,
 	PLAYER_MOVE,
+	ENEMY_MOVE,
 	PLAYER_ATTACK
 }
 
+var restart_dialog_scene: PackedScene = preload("res://scenes/ui/RestartDialog.tscn")
+
 signal turn_phase_changed(new_phase: TurnPhase)
 
-var current_phase: TurnPhase = TurnPhase.PLAYER_DECISION
+var current_phase: TurnPhase = TurnPhase.ENEMY_DECISION
 var player_confirmations: Dictionary = {
 	1: false,
 	2: false
@@ -83,13 +87,9 @@ func start_player_move_phase() -> void:
 	# Execute all player movements
 	execute_player_movements()
 
-	# Check if any players are in attack mode to proceed to attack phase
+	# Move to enemy move phase after player movement
 	await get_tree().create_timer(1.0).timeout # Brief pause to see movement
-
-	if has_players_in_attack_mode():
-		start_player_attack_phase()
-	else:
-		start_player_decision_phase()
+	start_enemy_move_phase()
 
 func start_player_decision_phase() -> void:
 	current_phase = TurnPhase.PLAYER_DECISION
@@ -111,10 +111,14 @@ func start_player_decision_phase() -> void:
 func update_phase_display() -> void:
 	if phase_label:
 		match current_phase:
+			TurnPhase.ENEMY_DECISION:
+				phase_label.text = "Phase: EnemyDecision"
 			TurnPhase.PLAYER_DECISION:
 				phase_label.text = "Phase: PlayerDecision"
 			TurnPhase.PLAYER_MOVE:
 				phase_label.text = "Phase: PlayerMove"
+			TurnPhase.ENEMY_MOVE:
+				phase_label.text = "Phase: EnemyMove"
 			TurnPhase.PLAYER_ATTACK:
 				phase_label.text = "Phase: PlayerAttack"
 	update_status_display()
@@ -193,9 +197,9 @@ func start_player_attack_phase() -> void:
 	# Hide all shooting indicators after attacks
 	hide_all_shooting_indicators()
 
-	# Return to decision phase after attacks
+	# Return to enemy decision phase after attacks
 	await get_tree().create_timer(1.0).timeout # Brief pause to see attack effects
-	start_player_decision_phase()
+	start_enemy_decision_phase()
 
 func has_players_in_attack_mode() -> bool:
 	# Check if any players are in attack mode and have locked shooting indicators
@@ -275,3 +279,73 @@ func hide_all_shooting_indicators() -> void:
 		if player and player.shooting_indicator:
 			player.shooting_indicator.hide_indicator()
 			print("Hidden shooting indicator for Player ", player_id)
+
+func start_enemy_decision_phase() -> void:
+	current_phase = TurnPhase.ENEMY_DECISION
+	turn_phase_changed.emit(current_phase)
+	update_phase_display()
+	print("Entering EnemyDecision phase")
+
+	# Execute enemy AI decision logic
+	board_manager.execute_enemy_decisions()
+
+	# Proceed to player decision phase after a brief delay
+	await get_tree().create_timer(1.0).timeout
+	start_player_decision_phase()
+
+func start_enemy_move_phase() -> void:
+	current_phase = TurnPhase.ENEMY_MOVE
+	turn_phase_changed.emit(current_phase)
+	update_phase_display()
+	print("Entering EnemyMove phase")
+
+	# Execute enemy movement
+	var enemy_positions = board_manager.execute_enemy_movements()
+
+	# Check for player death
+	var player_died = check_player_death(enemy_positions)
+	if player_died:
+		show_game_over_dialog()
+		return
+
+	# Check if any players are in attack mode to proceed to attack phase
+	await get_tree().create_timer(1.0).timeout # Brief pause to see enemy movement
+
+	if has_players_in_attack_mode():
+		start_player_attack_phase()
+	else:
+		start_enemy_decision_phase()
+
+func check_player_death(enemy_positions: Array) -> bool:
+	# Check if any enemy moved to a player's position
+	for player_id in [1, 2]:
+		var player = board_manager.get_player(player_id)
+		if not player:
+			continue
+
+		var player_pos = Vector2i(player.grid_x, player.grid_y)
+		for enemy_pos in enemy_positions:
+			if enemy_pos == player_pos:
+				print("Player ", player_id, " killed by enemy at position (", enemy_pos.x, ", ", enemy_pos.y, ")")
+				return true
+
+	return false
+
+func show_game_over_dialog() -> void:
+	print("GAME OVER - Player died!")
+
+	# Create and show restart dialog
+	var restart_dialog = restart_dialog_scene.instantiate()
+	restart_dialog.restart_requested.connect(_on_restart_requested)
+	get_tree().current_scene.add_child(restart_dialog)
+	restart_dialog.show_dialog()
+
+func _on_restart_requested() -> void:
+	restart_game()
+
+func restart_game() -> void:
+	print("Restarting game...")
+	# Unpause the game
+	get_tree().paused = false
+	# Reload the scene
+	get_tree().reload_current_scene()

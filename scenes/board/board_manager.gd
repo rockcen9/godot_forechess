@@ -64,6 +64,9 @@ func spawn_enemy_king() -> void:
 	add_child(enemy)
 	enemies[1] = enemy
 
+	# Initialize enemy target selection
+	initialize_enemy_targets()
+
 func get_player(player_id: int) -> Player:
 	return players.get(player_id, null)
 
@@ -91,3 +94,29 @@ func remove_enemy(enemy: Enemy) -> void:
 	if enemy.get_parent():
 		enemy.get_parent().remove_child(enemy)
 	enemy.queue_free()
+
+func initialize_enemy_targets() -> void:
+	# Initialize target selection for all enemies
+	var available_players = players.values()
+	for enemy in enemies.values():
+		enemy.select_target_player(available_players)
+
+func execute_enemy_decisions() -> void:
+	# Execute AI decision logic for all enemies
+	print("=== EXECUTING ENEMY DECISIONS ===")
+	for enemy in enemies.values():
+		enemy.make_decision(self)
+	print("=== ENEMY DECISIONS COMPLETE ===")
+
+func execute_enemy_movements() -> Array:
+	# Execute enemy movements and return list of positions where enemies moved
+	print("=== EXECUTING ENEMY MOVEMENTS ===")
+	var enemy_positions = []
+	for enemy in enemies.values():
+		if enemy.execute_planned_move(self):
+			enemy_positions.append(Vector2i(enemy.grid_x, enemy.grid_y))
+	print("=== ENEMY MOVEMENTS COMPLETE ===")
+	return enemy_positions
+
+func get_all_players() -> Array:
+	return players.values()
