@@ -46,3 +46,17 @@ offset_right = 300.0
 offset_bottom = -20.0
 text = "Player 1: ⏳ | Player 2: ⏳"
 label_settings = SubResource("1_label_settings")
+
+[node name="PlayerModesLabel" type="Label" parent="UI"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -50.0
+text = "P1 Mode: Move | P2 Mode: Move"
+label_settings = SubResource("1_label_settings")
+horizontal_alignment = 2

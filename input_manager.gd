@@ -1,8 +1,10 @@
 extends Node
 
 signal player_direction_changed(player_id: int, direction: Vector2i)
+signal player_stick_input(player_id: int, stick_vector: Vector2)
 signal player_confirmed(player_id: int)
 signal player_cancelled(player_id: int)
+signal player_mode_switched(player_id: int)
 
 var player_directions: Dictionary = {
 	1: Vector2i.ZERO,
@@ -39,6 +41,10 @@ func _input(event: InputEvent) -> void:
 			player_cancelled.emit(1)
 		elif event.device == 1 and event.button_index == JOY_BUTTON_A:
 			player_cancelled.emit(2)
+		elif event.device == 0 and event.button_index == JOY_BUTTON_Y:
+			player_mode_switched.emit(1)
+		elif event.device == 1 and event.button_index == JOY_BUTTON_Y:
+			player_mode_switched.emit(2)
 
 func check_player_analog_input(player_id: int, device: int) -> void:
 	# Get analog stick input
@@ -61,6 +67,9 @@ func check_player_analog_input(player_id: int, device: int) -> void:
 	if new_direction != player_directions[player_id]:
 		player_directions[player_id] = new_direction
 		player_direction_changed.emit(player_id, new_direction)
+
+	# Always emit stick input for continuous rotation in attack mode
+	player_stick_input.emit(player_id, input_vector)
 
 	last_input_strength[player_id] = input_vector
 
@@ -111,6 +120,15 @@ func handle_keyboard_input(event: InputEventKey) -> void:
 		KEY_BACKSPACE:
 			player_id = 2
 			player_cancelled.emit(player_id)
+			return
+		# Mode switch buttons
+		KEY_Q:
+			player_id = 1
+			player_mode_switched.emit(player_id)
+			return
+		KEY_SLASH:
+			player_id = 2
+			player_mode_switched.emit(player_id)
 			return
 
 	if player_id > 0:

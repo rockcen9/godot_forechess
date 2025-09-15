@@ -31,13 +31,13 @@ func center_board() -> void:
 
 func spawn_player() -> void:
 	var player = player_scene.instantiate()
-	player.setup(2, 6, 1)  # player_id = 1
+	player.setup(2, 6, 1) # player_id = 1
 	add_child(player)
 	players[1] = player
 
 func spawn_player2() -> void:
 	var player2 = player_scene.instantiate()
-	player2.setup(5, 6, 2)  # player_id = 2
+	player2.setup(5, 6, 2) # player_id = 2
 	add_child(player2)
 	players[2] = player2
 
@@ -60,7 +60,7 @@ func move_player(player_id: int, direction: Vector2i) -> void:
 
 func spawn_enemy_king() -> void:
 	var enemy = enemy_scene.instantiate()
-	enemy.setup(3, 3, 1)  # enemy_id = 1
+	enemy.setup(3, 4, 1) # enemy_id = 1
 	add_child(enemy)
 	enemies[1] = enemy
 
@@ -69,3 +69,25 @@ func get_player(player_id: int) -> Player:
 
 func get_enemy(enemy_id: int) -> Enemy:
 	return enemies.get(enemy_id, null)
+
+func connect_player_mode_signals(callback: Callable) -> void:
+	# Connect player mode change signals to the provided callback
+	for player_id in players.keys():
+		var player = players[player_id]
+		if player:
+			player.player_mode_changed.connect(callback)
+
+func get_all_enemies() -> Array:
+	return enemies.values()
+
+func remove_enemy(enemy: Enemy) -> void:
+	# Find and remove the enemy from the enemies dictionary
+	for enemy_id in enemies.keys():
+		if enemies[enemy_id] == enemy:
+			enemies.erase(enemy_id)
+			break
+
+	# Remove the enemy from the scene tree
+	if enemy.get_parent():
+		enemy.get_parent().remove_child(enemy)
+	enemy.queue_free()
