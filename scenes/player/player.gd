@@ -107,31 +107,39 @@ func _on_player_confirmed(player_id_signal: int) -> void:
 
 	# Handle confirmations differently based on mode
 	if current_mode == PlayerMode.ATTACK:
-		# In attack mode, X button locks the shooting indicator
+		# In attack mode, X button ONLY locks the shooting indicator
 		if shooting_indicator and shooting_indicator.visible and not shooting_indicator.is_indicator_locked():
 			shooting_indicator.lock_indicator()
 			print("Player ", player_id, " locked shooting indicator")
+		else:
+			print("Player ", player_id, " shooting confirmation rejected - indicator not available or already locked")
 		return
 
-	# Don't allow multiple confirmations
-	if preview_confirmed:
-		print("Player ", player_id, " already confirmed - ignoring")
+	# In MOVE mode, X button ONLY confirms movement
+	if current_mode == PlayerMode.MOVE:
+		# Don't allow multiple confirmations
+		if preview_confirmed:
+			print("Player ", player_id, " move confirmation rejected - already confirmed")
+			return
+
+		print("Player ", player_id, " received move confirmation signal")
+
+		# Only confirm during decision phase
+		var game_manager = get_node("../../GameManager")
+		if not game_manager or not game_manager.is_decision_phase():
+			print("Player ", player_id, " move confirmation rejected - not in decision phase")
+			return
+
+		# Confirm the preview if it's visible
+		if preview_visible:
+			print("Player ", player_id, " confirming move preview - locking input")
+			confirm_preview()
+			# Notify the GameManager that this player has confirmed their move
+			if game_manager:
+				game_manager._on_player_confirmed(player_id)
+		else:
+			print("Player ", player_id, " move confirmation rejected - no preview visible")
 		return
-
-	print("Player ", player_id, " received confirmation signal")
-
-	# Only confirm during decision phase
-	var game_manager = get_node("../../GameManager")
-	if not game_manager or not game_manager.is_decision_phase():
-		print("Player ", player_id, " confirmation rejected - not in decision phase")
-		return
-
-	# Confirm the preview if it's visible
-	if preview_visible:
-		print("Player ", player_id, " confirming preview - locking input")
-		confirm_preview()
-	else:
-		print("Player ", player_id, " confirmation rejected - no preview visible")
 
 func show_preview(target_x: int, target_y: int) -> void:
 	preview_visible = true
@@ -180,38 +188,43 @@ func _on_player_cancelled(player_id_signal: int) -> void:
 
 	# Handle cancellations differently based on mode
 	if current_mode == PlayerMode.ATTACK:
-		# In attack mode, A button unlocks the shooting indicator
+		# In attack mode, A button ONLY unlocks the shooting indicator
 		if shooting_indicator and shooting_indicator.is_indicator_locked():
 			shooting_indicator.unlock_indicator()
 			print("Player ", player_id, " unlocked shooting indicator")
+		else:
+			print("Player ", player_id, " shooting cancel ignored - indicator not locked")
 		return
 
-	# Only allow cancel if confirmed
-	if not preview_confirmed:
-		print("Player ", player_id, " cancel ignored - not confirmed")
-		return
+	# In MOVE mode, A button ONLY cancels movement confirmation
+	if current_mode == PlayerMode.MOVE:
+		# Only allow cancel if confirmed
+		if not preview_confirmed:
+			print("Player ", player_id, " move cancel ignored - not confirmed")
+			return
 
-	print("Player ", player_id, " cancelled confirmation - input re-enabled")
+		print("Player ", player_id, " cancelled move confirmation - input re-enabled")
 
-	# Reset confirmation state
-	preview_confirmed = false
+		# Reset confirmation state
+		preview_confirmed = false
 
-	# Hide confirmed sprite and show preview again at current stick position
-	confirmed_sprite.visible = false
+		# Hide confirmed sprite and show preview again at current stick position
+		confirmed_sprite.visible = false
 
-	# Get current stick direction and show preview if valid
-	var input_manager = get_node("../../InputManager")
-	if input_manager:
-		var current_direction = input_manager.get_player_direction_vector(player_id)
-		if current_direction != Vector2i.ZERO:
-			var target_x = grid_x + current_direction.x
-			var target_y = grid_y + current_direction.y
-			if target_x >= 0 and target_x < 8 and target_y >= 0 and target_y < 8:
-				show_preview(target_x, target_y)
+		# Get current stick direction and show preview if valid
+		var input_manager = get_node("../../InputManager")
+		if input_manager:
+			var current_direction = input_manager.get_player_direction_vector(player_id)
+			if current_direction != Vector2i.ZERO:
+				var target_x = grid_x + current_direction.x
+				var target_y = grid_y + current_direction.y
+				if target_x >= 0 and target_x < 8 and target_y >= 0 and target_y < 8:
+					show_preview(target_x, target_y)
+				else:
+					hide_preview()
 			else:
 				hide_preview()
-		else:
-			hide_preview()
+		return
 
 func reset_confirmation_state() -> void:
 	# Reset confirmation state for new turn
