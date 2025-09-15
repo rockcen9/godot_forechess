@@ -31,9 +31,6 @@ func setup(x: int, y: int, id: int) -> void:
 func _ready() -> void:
 	create_health_bar()
 	create_target_gizmo()
-	# Debug: Show gizmo immediately for testing
-	await get_tree().create_timer(0.5).timeout
-	debug_show_gizmo()
 
 func create_health_bar() -> void:
 	# Create health bar background

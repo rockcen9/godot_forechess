@@ -46,6 +46,10 @@ func _ready() -> void:
 	update_phase_display()
 	update_modes_display()
 
+	# Start the first enemy decision phase after a brief delay
+	await get_tree().create_timer(0.5).timeout
+	start_enemy_decision_phase()
+
 func _on_player_confirmed(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
 		player_confirmations[player_id] = true
