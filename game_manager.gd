@@ -348,7 +348,7 @@ func restart_game() -> void:
 	get_tree().reload_current_scene()
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):  # ESC key
+	if event.is_action_pressed("ui_cancel") and not get_tree().paused:  # ESC key, only when not paused
 		show_pause_menu()
 
 func show_pause_menu() -> void:
