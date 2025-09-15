@@ -11,13 +11,13 @@ func setup(x: int, y: int, light: bool) -> void:
 	is_light = light
 
 	# Set position based on grid coordinates
-	position = Vector2(x * 64, y * 64)  # Assuming 64x64 pixel tiles
+	position = Vector2(x * 20, y * 20)  # 20x20 pixel tiles
 
 	# You can add visual representation here
 	# For now, just a simple colored rectangle
 	queue_redraw()
 
 func _draw() -> void:
-	var tile_size = Vector2(64, 64)
+	var tile_size = Vector2(20, 20)
 	var color = Color.WHITE if is_light else Color.GRAY
 	draw_rect(Rect2(Vector2.ZERO, tile_size), color)
