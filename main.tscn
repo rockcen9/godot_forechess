@@ -4,6 +4,9 @@
 
 [node name="Main" type="Node2D"]
 
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(4, 4)
+
 [node name="BoardManager" parent="." instance=ExtResource("1_board_scene")]
 
 [node name="GameManager" type="Node" parent="."]

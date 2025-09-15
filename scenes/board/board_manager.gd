@@ -21,10 +21,9 @@ func init_board():
 			board_tiles[x].append(tile)
 
 func center_board() -> void:
-	var screen_size = get_viewport().get_visible_rect().size
 	var board_pixel_size = BOARD_SIZE * 20  # 20 pixels per tile
-	var center_offset = (screen_size - Vector2(board_pixel_size, board_pixel_size)) / 2
-	position = center_offset
+	# Center the board around (0,0) which is where the camera is
+	position = Vector2(-board_pixel_size/2, -board_pixel_size/2)
 
 func spawn_player() -> void:
 	player = player_scene.instantiate()
