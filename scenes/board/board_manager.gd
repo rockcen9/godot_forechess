@@ -64,6 +64,12 @@ func spawn_enemy_king() -> void:
 	add_child(enemy)
 	enemies[1] = enemy
 
+	# Spawn second enemy nearby
+	var enemy2 = enemy_scene.instantiate()
+	enemy2.setup(4, 3, 2) # enemy_id = 2, nearby tile
+	add_child(enemy2)
+	enemies[2] = enemy2
+
 	# Initialize enemy target selection
 	initialize_enemy_targets()
 
