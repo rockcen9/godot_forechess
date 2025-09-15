@@ -15,16 +15,22 @@ var player_confirmations: Dictionary = {
 
 @onready var input_manager: Node = get_node("../InputManager")
 @onready var board_manager: Node2D = get_node("../BoardManager")
+@onready var phase_label: Label = get_node("../UI/PhaseLabel")
+@onready var status_label: Label = get_node("../UI/StatusLabel")
 
 func _ready() -> void:
 	# Connect to input manager signals
 	input_manager.player_confirmed.connect(_on_player_confirmed)
 	input_manager.player_cancelled.connect(_on_player_cancelled)
 
+	# Initialize phase display
+	update_phase_display()
+
 func _on_player_confirmed(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
 		player_confirmations[player_id] = true
 		print("Player ", player_id, " confirmed their move")
+		update_status_display()
 
 		# Check if all players have confirmed
 		var all_confirmed = true
@@ -39,6 +45,7 @@ func _on_player_confirmed(player_id: int) -> void:
 func start_player_move_phase() -> void:
 	current_phase = TurnPhase.PLAYER_MOVE
 	turn_phase_changed.emit(current_phase)
+	update_phase_display()
 	print("Entering PlayerMove phase")
 
 	# Execute all player movements
@@ -51,6 +58,7 @@ func start_player_move_phase() -> void:
 func start_player_decision_phase() -> void:
 	current_phase = TurnPhase.PLAYER_DECISION
 	turn_phase_changed.emit(current_phase)
+	update_phase_display()
 	print("Entering PlayerDecision phase")
 
 	# Reset confirmations for next turn
@@ -59,6 +67,27 @@ func start_player_decision_phase() -> void:
 
 	# Reset player confirmation states
 	reset_player_confirmations()
+
+func update_phase_display() -> void:
+	if phase_label:
+		match current_phase:
+			TurnPhase.PLAYER_DECISION:
+				phase_label.text = "Phase: PlayerDecision"
+			TurnPhase.PLAYER_MOVE:
+				phase_label.text = "Phase: PlayerMove"
+	update_status_display()
+
+func update_status_display() -> void:
+	if status_label:
+		var p1_status = "⏳"  # Waiting
+		var p2_status = "⏳"  # Waiting
+
+		if player_confirmations[1]:
+			p1_status = "✅"  # Confirmed
+		if player_confirmations[2]:
+			p2_status = "✅"  # Confirmed
+
+		status_label.text = "Player 1: " + p1_status + " | Player 2: " + p2_status
 
 func reset_player_confirmations() -> void:
 	# Reset confirmation state for all players
@@ -78,6 +107,7 @@ func _on_player_cancelled(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
 		player_confirmations[player_id] = false
 		print("GameManager: Player ", player_id, " cancelled confirmation")
+		update_status_display()
 
 func is_decision_phase() -> bool:
 	return current_phase == TurnPhase.PLAYER_DECISION

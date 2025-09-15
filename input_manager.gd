@@ -32,16 +32,12 @@ func _input(event: InputEvent) -> void:
 	# Handle button confirmation for controllers
 	elif event is InputEventJoypadButton and event.pressed:
 		if event.device == 0 and event.button_index == JOY_BUTTON_X:
-			print("Controller 0 X button pressed - Player 1 confirmed")
 			player_confirmed.emit(1)
 		elif event.device == 1 and event.button_index == JOY_BUTTON_X:
-			print("Controller 1 X button pressed - Player 2 confirmed")
 			player_confirmed.emit(2)
 		elif event.device == 0 and event.button_index == JOY_BUTTON_A:
-			print("Controller 0 A button pressed - Player 1 cancel")
 			player_cancelled.emit(1)
 		elif event.device == 1 and event.button_index == JOY_BUTTON_A:
-			print("Controller 1 A button pressed - Player 2 cancel")
 			player_cancelled.emit(2)
 
 func check_player_analog_input(player_id: int, device: int) -> void:
@@ -118,7 +114,6 @@ func handle_keyboard_input(event: InputEventKey) -> void:
 			return
 
 	if player_id > 0:
-		print("Keyboard input - Player ", player_id, " direction: ", direction)
 		player_direction_changed.emit(player_id, direction)
 
 func get_player_direction_vector(player_id: int) -> Vector2i:
