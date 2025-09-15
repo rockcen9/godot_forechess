@@ -16,6 +16,11 @@ var player_directions: Dictionary = {
 	2: Direction.NONE
 }
 
+var direction_timers: Dictionary = {
+	1: null,
+	2: null
+}
+
 func _ready() -> void:
 	# Enable input processing
 	set_process_input(true)
@@ -42,13 +47,13 @@ func handle_keyboard_input(event: InputEventKey) -> void:
 			direction = Vector2i(0, -1)
 		KEY_A:
 			player_id = 1
-			direction = Vector2i(-1, 0)
+			direction = Vector2i(-1, 0)  # A = Left = decrease X
 		KEY_S:
 			player_id = 1
-			direction = Vector2i(0, 1)
+			direction = Vector2i(0, 1)   # S = Down = increase Y
 		KEY_D:
 			player_id = 1
-			direction = Vector2i(1, 0)
+			direction = Vector2i(1, 0)   # D = Right = increase X
 		KEY_SPACE:
 			player_id = 1
 			player_confirmed.emit(player_id)
@@ -84,27 +89,54 @@ func handle_player_input(player_id: int, event: InputEvent) -> void:
 
 func handle_joystick_direction(player_id: int, event: InputEventJoypadMotion) -> void:
 	var new_direction = Direction.NONE
+	var threshold = 0.3  # Lower threshold for better responsiveness
 
 	# Left stick horizontal (axis 0)
 	if event.axis == JOY_AXIS_LEFT_X:
-		if event.axis_value < -0.5:
+		if event.axis_value < -threshold:
 			new_direction = Direction.LEFT
-		elif event.axis_value > 0.5:
+		elif event.axis_value > threshold:
 			new_direction = Direction.RIGHT
 
 	# Left stick vertical (axis 1)
 	elif event.axis == JOY_AXIS_LEFT_Y:
-		if event.axis_value < -0.5:
+		if event.axis_value < -threshold:
 			new_direction = Direction.UP
-		elif event.axis_value > 0.5:
+		elif event.axis_value > threshold:
 			new_direction = Direction.DOWN
 
-	# Update direction if changed
+	# Only update if direction actually changed
 	if new_direction != player_directions[player_id]:
+		# Cancel any existing timer for this player
+		if direction_timers[player_id]:
+			direction_timers[player_id].queue_free()
+			direction_timers[player_id] = null
+
+		# If the new direction is NONE, start a timer before clearing
+		if new_direction == Direction.NONE and player_directions[player_id] != Direction.NONE:
+			var timer = Timer.new()
+			timer.wait_time = 0.1  # 100ms delay
+			timer.one_shot = true
+			timer.timeout.connect(_clear_player_direction.bind(player_id))
+			add_child(timer)
+			direction_timers[player_id] = timer
+			timer.start()
+			return
+
 		player_directions[player_id] = new_direction
 		var direction_vector = direction_to_vector(new_direction)
 		print("Player ", player_id, " direction changed to: ", direction_vector)
 		player_direction_changed.emit(player_id, direction_vector)
+
+func _clear_player_direction(player_id: int) -> void:
+	if direction_timers[player_id]:
+		direction_timers[player_id].queue_free()
+		direction_timers[player_id] = null
+
+	player_directions[player_id] = Direction.NONE
+	var direction_vector = direction_to_vector(Direction.NONE)
+	print("Player ", player_id, " direction cleared to: ", direction_vector)
+	player_direction_changed.emit(player_id, direction_vector)
 
 func handle_joystick_button(player_id: int, event: InputEventJoypadButton) -> void:
 	# Xbox X button (button 0)

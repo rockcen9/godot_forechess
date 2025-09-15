@@ -82,6 +82,8 @@ func show_preview(target_x: int, target_y: int) -> void:
 	preview_x = target_x
 	preview_y = target_y
 
+	print("Player ", player_id, " preview at grid (", target_x, ", ", target_y, ") pixel pos: ", Vector2(target_x * 20 + 10, target_y * 20 + 10))
+
 	# Position and show next position sprite
 	next_position_sprite.position = Vector2(target_x * 20 + 10, target_y * 20 + 10)
 	next_position_sprite.visible = true
