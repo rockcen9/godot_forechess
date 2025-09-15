@@ -14,6 +14,11 @@ var player_confirmations: Dictionary = {
 	2: false
 }
 
+var player_confirmed_directions: Dictionary = {
+	1: Vector2i.ZERO,
+	2: Vector2i.ZERO
+}
+
 @onready var input_manager: Node = get_node("../InputManager")
 @onready var board_manager: Node2D = get_node("../BoardManager")
 @onready var phase_label: Label = get_node("../UI/PhaseLabel")
@@ -40,7 +45,10 @@ func _ready() -> void:
 func _on_player_confirmed(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
 		player_confirmations[player_id] = true
-		print("Player ", player_id, " confirmed their move")
+		# Capture the direction at confirmation time
+		player_confirmed_directions[player_id] = input_manager.get_player_direction_vector(player_id)
+		print("GameManager: Player ", player_id, " confirmed their move with direction: ", player_confirmed_directions[player_id])
+		print("Current confirmations: ", player_confirmations)
 		update_status_display()
 
 		# Check if all players have confirmed
@@ -50,6 +58,7 @@ func _on_player_confirmed(player_id: int) -> void:
 				all_confirmed = false
 				break
 
+		print("All players confirmed: ", all_confirmed)
 		if all_confirmed:
 			start_player_move_phase()
 
@@ -79,6 +88,10 @@ func start_player_decision_phase() -> void:
 	# Reset confirmations for next turn
 	player_confirmations[1] = false
 	player_confirmations[2] = false
+
+	# Reset confirmed directions
+	player_confirmed_directions[1] = Vector2i.ZERO
+	player_confirmed_directions[2] = Vector2i.ZERO
 
 	# Reset player confirmation states
 	reset_player_confirmations()
@@ -115,10 +128,16 @@ func reset_player_confirmations() -> void:
 
 func execute_player_movements() -> void:
 	# Get player movement directions and execute them
+	print("=== EXECUTING PLAYER MOVEMENTS ===")
 	for player_id in [1, 2]:
+		print("Player ", player_id, " confirmed: ", player_confirmations[player_id])
 		if player_confirmations[player_id]:
-			var direction = input_manager.get_player_direction_vector(player_id)
+			var direction = player_confirmed_directions[player_id]
+			print("Player ", player_id, " using confirmed direction: ", direction)
 			board_manager.move_player(player_id, direction)
+		else:
+			print("Player ", player_id, " not confirmed, skipping movement")
+	print("=== MOVEMENT EXECUTION COMPLETE ===")
 
 func _on_player_cancelled(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
