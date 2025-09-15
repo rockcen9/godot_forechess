@@ -353,3 +353,16 @@ func restart_game() -> void:
 	get_tree().paused = false
 	# Reload the scene
 	get_tree().reload_current_scene()
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):  # ESC key
+		show_restart_dialog()
+
+func show_restart_dialog() -> void:
+	print("Showing restart dialog...")
+
+	# Create and show restart dialog
+	var restart_dialog = restart_dialog_scene.instantiate()
+	restart_dialog.restart_requested.connect(_on_restart_requested)
+	get_tree().current_scene.add_child(restart_dialog)
+	restart_dialog.show_dialog()
