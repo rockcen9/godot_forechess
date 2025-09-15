@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddcnl7y7kkstw"]
+
+[ext_resource type="Script" uid="uid://dghmnxdnus1fl" path="res://scenes/ui/restart_dialog.gd" id="1_x8t3d"]
+
+[node name="RestartDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x8t3d")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="GameOverLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "GAME OVER!"
+horizontal_alignment = 1
+
+[node name="MessageLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "You were caught by an enemy!"
+horizontal_alignment = 1
+
+[node name="RestartButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Restart Game"
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/RestartButton" to="." method="_on_restart_button_pressed"]
