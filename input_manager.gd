@@ -30,9 +30,11 @@ func _input(event: InputEvent) -> void:
 		handle_keyboard_input(event)
 	# Handle button confirmation for controllers
 	elif event is InputEventJoypadButton and event.pressed:
-		if event.device == 0 and event.button_index == JOY_BUTTON_A:
+		if event.device == 0 and event.button_index == JOY_BUTTON_X:
+			print("Controller 0 X button pressed - Player 1 confirmed")
 			player_confirmed.emit(1)
-		elif event.device == 1 and event.button_index == JOY_BUTTON_A:
+		elif event.device == 1 and event.button_index == JOY_BUTTON_X:
+			print("Controller 1 X button pressed - Player 2 confirmed")
 			player_confirmed.emit(2)
 
 func check_player_analog_input(player_id: int, device: int) -> void:

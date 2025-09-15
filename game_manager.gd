@@ -56,6 +56,16 @@ func start_player_decision_phase() -> void:
 	player_confirmations[1] = false
 	player_confirmations[2] = false
 
+	# Reset player confirmation states
+	reset_player_confirmations()
+
+func reset_player_confirmations() -> void:
+	# Reset confirmation state for all players
+	for player_id in [1, 2]:
+		var player = board_manager.get_player(player_id)
+		if player:
+			player.reset_confirmation_state()
+
 func execute_player_movements() -> void:
 	# Get player movement directions and execute them
 	for player_id in [1, 2]:

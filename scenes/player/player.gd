@@ -44,14 +44,19 @@ func _on_direction_changed(player_id_signal: int, direction: Vector2i) -> void:
 	if player_id_signal != player_id:
 		return
 
+	# Don't respond to input if already confirmed
+	if preview_confirmed:
+		return
+
 	# Only show preview during decision phase
 	var game_manager = get_node("../../GameManager")
 	if not game_manager or not game_manager.is_decision_phase():
 		return
 
 	if direction == Vector2i(0, 0):
-		# No direction selected, hide preview
-		hide_preview()
+		# No direction selected, hide preview (only if not confirmed)
+		if not preview_confirmed:
+			hide_preview()
 	else:
 		# Calculate target position
 		var target_x = grid_x + direction.x
@@ -67,14 +72,25 @@ func _on_player_confirmed(player_id_signal: int) -> void:
 	if player_id_signal != player_id:
 		return
 
+	# Don't allow multiple confirmations
+	if preview_confirmed:
+		print("Player ", player_id, " already confirmed - ignoring")
+		return
+
+	print("Player ", player_id, " received confirmation signal")
+
 	# Only confirm during decision phase
 	var game_manager = get_node("../../GameManager")
 	if not game_manager or not game_manager.is_decision_phase():
+		print("Player ", player_id, " confirmation rejected - not in decision phase")
 		return
 
 	# Confirm the preview if it's visible
 	if preview_visible:
+		print("Player ", player_id, " confirming preview - locking input")
 		confirm_preview()
+	else:
+		print("Player ", player_id, " confirmation rejected - no preview visible")
 
 func show_preview(target_x: int, target_y: int) -> void:
 	preview_visible = true
@@ -112,3 +128,9 @@ func move_to(new_x: int, new_y: int) -> void:
 
 	# Hide preview after movement
 	hide_preview()
+
+func reset_confirmation_state() -> void:
+	# Reset confirmation state for new turn
+	preview_confirmed = false
+	hide_preview()
+	print("Player ", player_id, " confirmation state reset - input enabled")
