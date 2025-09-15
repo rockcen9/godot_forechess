@@ -1,11 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://be8yno3xg2v4u"]
+[gd_scene load_steps=2 format=3 uid="uid://be8yno3xg2v4u"]
 
 [ext_resource type="Script" path="res://scenes/player/player.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://bcdj6xqt3e6oi" path="res://assets/units/player/soldier.png" id="2_texture"]
 
 [node name="Player" type="Node2D"]
 script = ExtResource("1_script")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(32, 32)
-texture = ExtResource("2_texture")

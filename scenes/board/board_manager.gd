@@ -4,7 +4,7 @@ const BOARD_SIZE := 8
 var board_tiles: Array[Array] = []
 var tile_scene: PackedScene = preload("res://scenes/board/BoardTile.tscn")
 var player_scene: PackedScene = preload("res://scenes/player/Player.tscn")
-var player: Player
+var player
 
 func _ready() -> void:
 	init_board()
