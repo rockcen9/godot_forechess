@@ -4,13 +4,16 @@ const BOARD_SIZE := 8
 var board_tiles: Array[Array] = []
 var tile_scene: PackedScene = preload("res://scenes/board/BoardTile.tscn")
 var player_scene: PackedScene = preload("res://scenes/player/Player.tscn")
+var enemy_scene: PackedScene = preload("res://scenes/enemy/Enemy.tscn")
 var players: Dictionary = {}
+var enemies: Dictionary = {}
 
 func _ready() -> void:
 	init_board()
 	center_board()
 	spawn_player()
 	spawn_player2()
+	spawn_enemy_king()
 
 func init_board():
 	for x in BOARD_SIZE:
@@ -55,5 +58,14 @@ func move_player(player_id: int, direction: Vector2i) -> void:
 	player.move_to(new_x, new_y)
 	print("Player ", player_id, " moved to (", new_x, ", ", new_y, ")")
 
+func spawn_enemy_king() -> void:
+	var enemy = enemy_scene.instantiate()
+	enemy.setup(3, 3, 1)  # enemy_id = 1
+	add_child(enemy)
+	enemies[1] = enemy
+
 func get_player(player_id: int) -> Player:
 	return players.get(player_id, null)
+
+func get_enemy(enemy_id: int) -> Enemy:
+	return enemies.get(enemy_id, null)
