@@ -8,5 +8,5 @@ func setup(x: int, y: int) -> void:
 	grid_x = x
 	grid_y = y
 
-	# Set position based on grid coordinates (following BoardTile pattern)
-	position = Vector2(x * 20, y * 20)
+	# Set position based on grid coordinates, centered within the tile
+	position = Vector2(x * 20 + 10, y * 20 + 10)  # +10 to center in 20px tile
