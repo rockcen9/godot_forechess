@@ -190,6 +190,9 @@ func start_player_attack_phase() -> void:
 	# Execute all player attacks
 	execute_player_attacks()
 
+	# Hide all shooting indicators after attacks
+	hide_all_shooting_indicators()
+
 	# Return to decision phase after attacks
 	await get_tree().create_timer(1.0).timeout # Brief pause to see attack effects
 	start_player_decision_phase()
@@ -264,3 +267,11 @@ func damage_enemy(enemy: Enemy, damage: int) -> void:
 func destroy_enemy(enemy: Enemy) -> void:
 	print("Destroying enemy at (", enemy.grid_x, ", ", enemy.grid_y, ")")
 	board_manager.remove_enemy(enemy)
+
+func hide_all_shooting_indicators() -> void:
+	print("Hiding all shooting indicators after attack phase")
+	for player_id in [1, 2]:
+		var player = board_manager.get_player(player_id)
+		if player and player.shooting_indicator:
+			player.shooting_indicator.hide_indicator()
+			print("Hidden shooting indicator for Player ", player_id)
