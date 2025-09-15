@@ -2,6 +2,7 @@ extends Node
 
 signal player_direction_changed(player_id: int, direction: Vector2i)
 signal player_confirmed(player_id: int)
+signal player_cancelled(player_id: int)
 
 var player_directions: Dictionary = {
 	1: Vector2i.ZERO,
@@ -36,6 +37,12 @@ func _input(event: InputEvent) -> void:
 		elif event.device == 1 and event.button_index == JOY_BUTTON_X:
 			print("Controller 1 X button pressed - Player 2 confirmed")
 			player_confirmed.emit(2)
+		elif event.device == 0 and event.button_index == JOY_BUTTON_A:
+			print("Controller 0 A button pressed - Player 1 cancel")
+			player_cancelled.emit(1)
+		elif event.device == 1 and event.button_index == JOY_BUTTON_A:
+			print("Controller 1 A button pressed - Player 2 cancel")
+			player_cancelled.emit(2)
 
 func check_player_analog_input(player_id: int, device: int) -> void:
 	# Get analog stick input
@@ -57,7 +64,6 @@ func check_player_analog_input(player_id: int, device: int) -> void:
 	# Only emit signal if direction changed
 	if new_direction != player_directions[player_id]:
 		player_directions[player_id] = new_direction
-		print("Player ", player_id, " analog direction changed to: ", new_direction)
 		player_direction_changed.emit(player_id, new_direction)
 
 	last_input_strength[player_id] = input_vector
@@ -100,6 +106,15 @@ func handle_keyboard_input(event: InputEventKey) -> void:
 		KEY_ENTER:
 			player_id = 2
 			player_confirmed.emit(player_id)
+			return
+		# Cancel buttons
+		KEY_ESCAPE:
+			player_id = 1
+			player_cancelled.emit(player_id)
+			return
+		KEY_BACKSPACE:
+			player_id = 2
+			player_cancelled.emit(player_id)
 			return
 
 	if player_id > 0:

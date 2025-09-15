@@ -19,6 +19,7 @@ var player_confirmations: Dictionary = {
 func _ready() -> void:
 	# Connect to input manager signals
 	input_manager.player_confirmed.connect(_on_player_confirmed)
+	input_manager.player_cancelled.connect(_on_player_cancelled)
 
 func _on_player_confirmed(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
@@ -72,6 +73,11 @@ func execute_player_movements() -> void:
 		if player_confirmations[player_id]:
 			var direction = input_manager.get_player_direction_vector(player_id)
 			board_manager.move_player(player_id, direction)
+
+func _on_player_cancelled(player_id: int) -> void:
+	if current_phase == TurnPhase.PLAYER_DECISION:
+		player_confirmations[player_id] = false
+		print("GameManager: Player ", player_id, " cancelled confirmation")
 
 func is_decision_phase() -> bool:
 	return current_phase == TurnPhase.PLAYER_DECISION

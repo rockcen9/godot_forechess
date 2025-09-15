@@ -39,6 +39,7 @@ func _ready() -> void:
 	if input_manager:
 		input_manager.player_direction_changed.connect(_on_direction_changed)
 		input_manager.player_confirmed.connect(_on_player_confirmed)
+		input_manager.player_cancelled.connect(_on_player_cancelled)
 
 func _on_direction_changed(player_id_signal: int, direction: Vector2i) -> void:
 	if player_id_signal != player_id:
@@ -128,6 +129,37 @@ func move_to(new_x: int, new_y: int) -> void:
 
 	# Hide preview after movement
 	hide_preview()
+
+func _on_player_cancelled(player_id_signal: int) -> void:
+	if player_id_signal != player_id:
+		return
+
+	# Only allow cancel if confirmed
+	if not preview_confirmed:
+		print("Player ", player_id, " cancel ignored - not confirmed")
+		return
+
+	print("Player ", player_id, " cancelled confirmation - input re-enabled")
+
+	# Reset confirmation state
+	preview_confirmed = false
+
+	# Hide confirmed sprite and show preview again at current stick position
+	confirmed_sprite.visible = false
+
+	# Get current stick direction and show preview if valid
+	var input_manager = get_node("../../InputManager")
+	if input_manager:
+		var current_direction = input_manager.get_player_direction_vector(player_id)
+		if current_direction != Vector2i.ZERO:
+			var target_x = grid_x + current_direction.x
+			var target_y = grid_y + current_direction.y
+			if target_x >= 0 and target_x < 8 and target_y >= 0 and target_y < 8:
+				show_preview(target_x, target_y)
+			else:
+				hide_preview()
+		else:
+			hide_preview()
 
 func reset_confirmation_state() -> void:
 	# Reset confirmation state for new turn
