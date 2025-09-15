@@ -19,6 +19,34 @@ This is a Godot 4.4 chess game project called "forechess" built with GDScript. T
   - `BoardManager.tscn/.gd` - Manages the 8x8 chess board
   - `BoardTile.tscn/.gd` - Individual board tile component
 
+### Assets Organization
+Assets must be organized by type and purpose following this structure:
+
+```
+assets/
+├── audio/
+│   ├── effects/        # Gameplay sounds (piece moves, captures, game events)
+│   ├── ui/            # Interface sounds (button clicks, menu navigation)
+│   └── music/         # Background music and ambient tracks
+├── textures/
+│   ├── ui/            # User interface graphics
+│   ├── board/         # Board backgrounds and tile graphics
+│   ├── pieces/        # Chess piece sprites (player/enemy subdirs)
+│   └── effects/       # Visual effects and particles
+└── themes/            # UI themes and stylesheets
+```
+
+**Audio Classification Rules:**
+- **effects/**: Gameplay mechanics (fast_drop.wav, move_piece.wav, game_over.wav, line_clear.wav)
+- **ui/**: Interface interactions (button clicks, menu sounds, dialog open/close)
+- **music/**: Background tracks and ambient audio
+
+**Texture Classification Rules:**
+- **pieces/**: Organized by ownership (player/, enemy/) containing all piece sprites
+- **board/**: Board backgrounds, tile variations, position indicators
+- **ui/**: Menus, buttons, dialogs, HUD elements
+- **effects/**: Particle textures, visual feedback graphics
+
 ## Architecture
 
 ### Scene Hierarchy
