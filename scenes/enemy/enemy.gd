@@ -31,6 +31,9 @@ func setup(x: int, y: int, id: int) -> void:
 func _ready() -> void:
 	create_health_bar()
 	create_target_gizmo()
+	# Debug: Show gizmo immediately for testing
+	await get_tree().create_timer(0.5).timeout
+	debug_show_gizmo()
 
 func create_health_bar() -> void:
 	# Create health bar background
@@ -184,7 +187,7 @@ func create_target_gizmo() -> void:
 	target_gizmo.visible = false
 
 func _draw() -> void:
-	if gizmo_visible and target_gizmo:
+	if gizmo_visible:
 		# Calculate the world position of the target location
 		var target_world_pos = Vector2(target_location.x * 20 + 10, target_location.y * 20 + 10)
 		var current_world_pos = Vector2(grid_x * 20 + 10, grid_y * 20 + 10)
@@ -213,6 +216,9 @@ func _draw() -> void:
 			draw_line(arrow_end, arrowhead1, Color.RED, 2.0)
 			draw_line(arrow_end, arrowhead2, Color.RED, 2.0)
 
+		# Also draw a simple circle at current position for debugging
+		draw_circle(Vector2.ZERO, 3, Color.BLUE, true)
+
 func show_target_gizmo() -> void:
 	gizmo_visible = true
 	queue_redraw()
@@ -220,3 +226,13 @@ func show_target_gizmo() -> void:
 func hide_target_gizmo() -> void:
 	gizmo_visible = false
 	queue_redraw()
+
+func _process(delta) -> void:
+	if gizmo_visible:
+		queue_redraw()  # Continuously redraw when gizmo is visible
+
+func debug_show_gizmo() -> void:
+	# For testing - force show gizmo with current position as target
+	target_location = Vector2i(grid_x + 1, grid_y + 1)  # Move right and down
+	gizmo_visible = true
+	print("Debug: Forcing gizmo visibility for enemy ", enemy_id)
