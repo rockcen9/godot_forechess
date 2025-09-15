@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dn72nj1lcy5bi"
-path="res://.godot/imported/bishop.png-2f733816a8b2f00c5abb13c13251b8dc.ctex"
+uid="uid://c0abcgh13ok80"
+path="res://.godot/imported/bishop.png-81cb68805adf017aaf6ab048d369bbec.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/units/enemy/bishop.png"
-dest_files=["res://.godot/imported/bishop.png-2f733816a8b2f00c5abb13c13251b8dc.ctex"]
+source_file="res://assets/textures/units/player/bishop.png"
+dest_files=["res://.godot/imported/bishop.png-81cb68805adf017aaf6ab048d369bbec.ctex"]
 
 [params]
 

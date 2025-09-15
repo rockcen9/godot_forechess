@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bd12bk52jghfs"
-path="res://.godot/imported/queen.png-5db75cbb552ce1155ce2674b470302f0.ctex"
+uid="uid://bwdmivp3tdiep"
+path="res://.godot/imported/soldier.png-18cea93fc85078e6674777c5ec66a1e8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/units/player/queen.png"
-dest_files=["res://.godot/imported/queen.png-5db75cbb552ce1155ce2674b470302f0.ctex"]
+source_file="res://assets/textures/units/player/soldier.png"
+dest_files=["res://.godot/imported/soldier.png-18cea93fc85078e6674777c5ec66a1e8.ctex"]
 
 [params]
 

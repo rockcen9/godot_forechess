@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bb5bw05plgwux"
-path="res://.godot/imported/king.png-05ae43049c585f3e60af1730a0c22cd4.ctex"
+uid="uid://begl7qmklpna2"
+path="res://.godot/imported/next_position.png-a41184a298dfaea0ddf116601e1c93fc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/units/enemy/king.png"
-dest_files=["res://.godot/imported/king.png-05ae43049c585f3e60af1730a0c22cd4.ctex"]
+source_file="res://assets/textures/indicators/next_position.png"
+dest_files=["res://.godot/imported/next_position.png-a41184a298dfaea0ddf116601e1c93fc.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://b4xvkq7n8j2y1" path="res://scenes/board/BoardManager.tscn" id="1_board_scene"]
 [ext_resource type="Script" uid="uid://btoe81tfkiosd" path="res://main.gd" id="1_main_script"]
-[ext_resource type="Script" uid="uid://brerrflt00fxn" path="res://input_manager.gd" id="2_input_script"]
-[ext_resource type="Script" uid="uid://duhn8awe50wbv" path="res://game_manager.gd" id="3_game_script"]
+[ext_resource type="Script" path="res://input_manager.gd" id="2_input_script"]
+[ext_resource type="Script" path="res://game_manager.gd" id="3_game_script"]
 
 [sub_resource type="LabelSettings" id="1_label_settings"]
 outline_size = 2

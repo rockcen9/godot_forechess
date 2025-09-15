@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://begl7qmklpna2"
-path="res://.godot/imported/next_position.png-14cb1cd0ae9ae35f687167b885d13394.ctex"
+uid="uid://cx2alrtxuirnx"
+path="res://.godot/imported/king.png-6ca0a9aaef08e3d9373f3b2aa910d231.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/indicators/next_position.png"
-dest_files=["res://.godot/imported/next_position.png-14cb1cd0ae9ae35f687167b885d13394.ctex"]
+source_file="res://assets/textures/units/player/king.png"
+dest_files=["res://.godot/imported/king.png-6ca0a9aaef08e3d9373f3b2aa910d231.ctex"]
 
 [params]
 

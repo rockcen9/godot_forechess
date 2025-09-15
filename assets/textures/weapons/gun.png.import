@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crk4ppij2idki"
-path="res://.godot/imported/queen.png-2d799f0bcb067f6d4c21ec3a26a90ac8.ctex"
+uid="uid://d4jrq3ef70wwr"
+path="res://.godot/imported/gun.png-8e5a678464042022f4efbc5b619935a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/units/enemy/queen.png"
-dest_files=["res://.godot/imported/queen.png-2d799f0bcb067f6d4c21ec3a26a90ac8.ctex"]
+source_file="res://assets/textures/weapons/gun.png"
+dest_files=["res://.godot/imported/gun.png-8e5a678464042022f4efbc5b619935a3.ctex"]
 
 [params]
 
