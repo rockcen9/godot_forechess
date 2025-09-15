@@ -39,12 +39,12 @@ func setup(x: int, y: int, id: int) -> void:
 func _ready() -> void:
 	# Create preview sprites
 	next_position_sprite = Sprite2D.new()
-	next_position_sprite.texture = load("res://assets/indicators/next_position.png")
+	next_position_sprite.texture = load("res://assets/textures/indicators/next_position.png")
 	next_position_sprite.visible = false
 	get_parent().add_child(next_position_sprite)
 
 	confirmed_sprite = Sprite2D.new()
-	confirmed_sprite.texture = load("res://assets/indicators/confirmed.png")
+	confirmed_sprite.texture = load("res://assets/textures/indicators/confirmed.png")
 	confirmed_sprite.visible = false
 	get_parent().add_child(confirmed_sprite)
 
