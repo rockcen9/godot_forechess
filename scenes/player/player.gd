@@ -1,9 +1,17 @@
 extends Node2D
 class_name Player
 
+enum PlayerMode {
+	MOVE,
+	ATTACK
+}
+
+signal player_mode_changed(player_id: int, new_mode: PlayerMode)
+
 var grid_x: int
 var grid_y: int
 var player_id: int
+var current_mode: PlayerMode = PlayerMode.MOVE
 
 # Preview sprites
 @onready var next_position_sprite: Sprite2D
@@ -40,6 +48,7 @@ func _ready() -> void:
 		input_manager.player_direction_changed.connect(_on_direction_changed)
 		input_manager.player_confirmed.connect(_on_player_confirmed)
 		input_manager.player_cancelled.connect(_on_player_cancelled)
+		input_manager.player_mode_switched.connect(_on_mode_switched)
 
 func _on_direction_changed(player_id_signal: int, direction: Vector2i) -> void:
 	if player_id_signal != player_id:
@@ -166,3 +175,33 @@ func reset_confirmation_state() -> void:
 	preview_confirmed = false
 	hide_preview()
 	print("Player ", player_id, " confirmation state reset - input enabled")
+
+func _on_mode_switched(player_id_signal: int) -> void:
+	if player_id_signal != player_id:
+		return
+
+	# Switch between MOVE and ATTACK modes
+	if current_mode == PlayerMode.MOVE:
+		current_mode = PlayerMode.ATTACK
+		# Clear confirmed state when switching to attack mode
+		if preview_confirmed:
+			preview_confirmed = false
+			hide_preview()
+			print("Player ", player_id, " switched to Attack mode - cleared confirmed state")
+	else:
+		current_mode = PlayerMode.MOVE
+
+	print("Player ", player_id, " switched to mode: ", PlayerMode.keys()[current_mode])
+	player_mode_changed.emit(player_id, current_mode)
+
+func get_current_mode() -> PlayerMode:
+	return current_mode
+
+func get_mode_name() -> String:
+	match current_mode:
+		PlayerMode.MOVE:
+			return "Move"
+		PlayerMode.ATTACK:
+			return "Attack"
+		_:
+			return "Unknown"

@@ -17,14 +17,24 @@ var player_confirmations: Dictionary = {
 @onready var board_manager: Node2D = get_node("../BoardManager")
 @onready var phase_label: Label = get_node("../UI/PhaseLabel")
 @onready var status_label: Label = get_node("../UI/StatusLabel")
+@onready var player_modes_label: Label = get_node("../UI/PlayerModesLabel")
+
+var player_modes: Dictionary = {
+	1: "Move",
+	2: "Move"
+}
 
 func _ready() -> void:
 	# Connect to input manager signals
 	input_manager.player_confirmed.connect(_on_player_confirmed)
 	input_manager.player_cancelled.connect(_on_player_cancelled)
 
+	# Connect to player mode changes through board manager
+	board_manager.connect_player_mode_signals(_on_player_mode_changed)
+
 	# Initialize phase display
 	update_phase_display()
+	update_modes_display()
 
 func _on_player_confirmed(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
@@ -111,3 +121,19 @@ func _on_player_cancelled(player_id: int) -> void:
 
 func is_decision_phase() -> bool:
 	return current_phase == TurnPhase.PLAYER_DECISION
+
+func _on_player_mode_changed(player_id: int, new_mode) -> void:
+	# Update player mode display
+	match new_mode:
+		0: # PlayerMode.MOVE
+			player_modes[player_id] = "Move"
+		1: # PlayerMode.ATTACK
+			player_modes[player_id] = "Attack"
+		_:
+			player_modes[player_id] = "Unknown"
+
+	update_modes_display()
+
+func update_modes_display() -> void:
+	if player_modes_label:
+		player_modes_label.text = "P1 Mode: " + player_modes[1] + " | P2 Mode: " + player_modes[2]

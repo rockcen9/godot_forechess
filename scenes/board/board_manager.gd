@@ -69,3 +69,10 @@ func get_player(player_id: int) -> Player:
 
 func get_enemy(enemy_id: int) -> Enemy:
 	return enemies.get(enemy_id, null)
+
+func connect_player_mode_signals(callback: Callable) -> void:
+	# Connect player mode change signals to the provided callback
+	for player_id in players.keys():
+		var player = players[player_id]
+		if player:
+			player.player_mode_changed.connect(callback)
