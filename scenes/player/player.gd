@@ -111,6 +111,10 @@ func _on_player_confirmed(player_id_signal: int) -> void:
 		if shooting_indicator and shooting_indicator.visible and not shooting_indicator.is_indicator_locked():
 			shooting_indicator.lock_indicator()
 			print("Player ", player_id, " locked shooting indicator")
+			# Notify the GameManager to check if all players are ready
+			var game_manager = get_node("../../GameManager")
+			if game_manager:
+				game_manager.check_all_players_ready()
 		else:
 			print("Player ", player_id, " shooting confirmation rejected - indicator not available or already locked")
 		return

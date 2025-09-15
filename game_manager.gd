@@ -51,16 +51,28 @@ func _on_player_confirmed(player_id: int) -> void:
 		print("Current confirmations: ", player_confirmations)
 		update_status_display()
 
-		# Check if all players have confirmed
-		var all_confirmed = true
-		for confirmed in player_confirmations.values():
-			if not confirmed:
-				all_confirmed = false
-				break
+		check_all_players_ready()
 
-		print("All players confirmed: ", all_confirmed)
-		if all_confirmed:
-			start_player_move_phase()
+func check_all_players_ready() -> void:
+	# Check if all players have confirmed their actions (move or attack)
+	var all_confirmed = true
+	for pid in [1, 2]:
+		var player = board_manager.get_player(pid)
+		if player:
+			if player.get_current_mode() == 1: # PlayerMode.ATTACK
+				# For attack mode, check if shooting indicator is locked
+				if not (player.shooting_indicator and player.shooting_indicator.is_indicator_locked()):
+					all_confirmed = false
+					break
+			else: # PlayerMode.MOVE
+				# For move mode, check if move is confirmed
+				if not player_confirmations[pid]:
+					all_confirmed = false
+					break
+
+	print("All players ready: ", all_confirmed)
+	if all_confirmed:
+		start_player_move_phase()
 
 func start_player_move_phase() -> void:
 	current_phase = TurnPhase.PLAYER_MOVE
@@ -132,6 +144,11 @@ func execute_player_movements() -> void:
 	for player_id in [1, 2]:
 		print("Player ", player_id, " confirmed: ", player_confirmations[player_id])
 		if player_confirmations[player_id]:
+			var player = board_manager.get_player(player_id)
+			if player and player.get_current_mode() == 1: # PlayerMode.ATTACK
+				print("Player ", player_id, " is in attack mode - skipping movement")
+				continue
+
 			var direction = player_confirmed_directions[player_id]
 			print("Player ", player_id, " using confirmed direction: ", direction)
 			board_manager.move_player(player_id, direction)
