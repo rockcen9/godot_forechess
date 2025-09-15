@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8k3n7qm5xdah"]
+
+[ext_resource type="Script" path="res://scenes/player/ShootingIndicator.gd" id="1_shooting_indicator_script"]
+
+[node name="ShootingIndicator" type="Node2D"]
+script = ExtResource("1_shooting_indicator_script")

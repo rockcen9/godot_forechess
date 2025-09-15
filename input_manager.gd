@@ -1,6 +1,7 @@
 extends Node
 
 signal player_direction_changed(player_id: int, direction: Vector2i)
+signal player_stick_input(player_id: int, stick_vector: Vector2)
 signal player_confirmed(player_id: int)
 signal player_cancelled(player_id: int)
 signal player_mode_switched(player_id: int)
@@ -66,6 +67,9 @@ func check_player_analog_input(player_id: int, device: int) -> void:
 	if new_direction != player_directions[player_id]:
 		player_directions[player_id] = new_direction
 		player_direction_changed.emit(player_id, new_direction)
+
+	# Always emit stick input for continuous rotation in attack mode
+	player_stick_input.emit(player_id, input_vector)
 
 	last_input_strength[player_id] = input_vector
 

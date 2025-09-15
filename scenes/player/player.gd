@@ -17,6 +17,9 @@ var current_mode: PlayerMode = PlayerMode.MOVE
 @onready var next_position_sprite: Sprite2D
 @onready var confirmed_sprite: Sprite2D
 
+# Shooting indicator for attack mode
+var shooting_indicator: ShootingIndicator
+
 var preview_visible: bool = false
 var preview_confirmed: bool = false
 var preview_x: int = 0
@@ -42,10 +45,17 @@ func _ready() -> void:
 	confirmed_sprite.visible = false
 	get_parent().add_child(confirmed_sprite)
 
+	# Create shooting indicator
+	shooting_indicator = ShootingIndicator.new()
+	shooting_indicator.setup(player_id)
+	shooting_indicator.position = position
+	get_parent().add_child(shooting_indicator)
+
 	# Connect to input manager signals
 	var input_manager = get_node("../../InputManager")
 	if input_manager:
 		input_manager.player_direction_changed.connect(_on_direction_changed)
+		input_manager.player_stick_input.connect(_on_stick_input)
 		input_manager.player_confirmed.connect(_on_player_confirmed)
 		input_manager.player_cancelled.connect(_on_player_cancelled)
 		input_manager.player_mode_switched.connect(_on_mode_switched)
@@ -83,13 +93,24 @@ func _on_direction_changed(player_id_signal: int, direction: Vector2i) -> void:
 		else:
 			hide_preview()
 
+func _on_stick_input(player_id_signal: int, stick_vector: Vector2) -> void:
+	if player_id_signal != player_id:
+		return
+
+	# Only handle stick input for rotation in attack mode
+	if current_mode == PlayerMode.ATTACK:
+		shooting_indicator.update_rotation_from_stick(stick_vector)
+
 func _on_player_confirmed(player_id_signal: int) -> void:
 	if player_id_signal != player_id:
 		return
 
-	# Don't allow confirmations in attack mode
+	# Handle confirmations differently based on mode
 	if current_mode == PlayerMode.ATTACK:
-		print("Player ", player_id, " confirmation rejected - in attack mode")
+		# In attack mode, X button locks the shooting indicator
+		if shooting_indicator and shooting_indicator.visible and not shooting_indicator.is_indicator_locked():
+			shooting_indicator.lock_indicator()
+			print("Player ", player_id, " locked shooting indicator")
 		return
 
 	# Don't allow multiple confirmations
@@ -146,11 +167,23 @@ func move_to(new_x: int, new_y: int) -> void:
 	grid_y = new_y
 	position = Vector2(new_x * 20 + 10, new_y * 20 + 10)
 
+	# Update shooting indicator position
+	if shooting_indicator:
+		shooting_indicator.position = position
+
 	# Hide preview after movement
 	hide_preview()
 
 func _on_player_cancelled(player_id_signal: int) -> void:
 	if player_id_signal != player_id:
+		return
+
+	# Handle cancellations differently based on mode
+	if current_mode == PlayerMode.ATTACK:
+		# In attack mode, A button unlocks the shooting indicator
+		if shooting_indicator and shooting_indicator.is_indicator_locked():
+			shooting_indicator.unlock_indicator()
+			print("Player ", player_id, " unlocked shooting indicator")
 		return
 
 	# Only allow cancel if confirmed
@@ -197,9 +230,17 @@ func _on_mode_switched(player_id_signal: int) -> void:
 		if preview_confirmed or preview_visible:
 			preview_confirmed = false
 			hide_preview()
-			print("Player ", player_id, " switched to Attack mode - cleared preview state")
+		# Show shooting indicator
+		if shooting_indicator:
+			shooting_indicator.show_indicator()
+			shooting_indicator.position = position  # Update position to current player position
+		print("Player ", player_id, " switched to Attack mode - showing shooting indicator")
 	else:
 		current_mode = PlayerMode.MOVE
+		# Hide shooting indicator when switching to move mode
+		if shooting_indicator:
+			shooting_indicator.hide_indicator()
+		print("Player ", player_id, " switched to Move mode - hiding shooting indicator")
 
 	print("Player ", player_id, " switched to mode: ", PlayerMode.keys()[current_mode])
 	player_mode_changed.emit(player_id, current_mode)
