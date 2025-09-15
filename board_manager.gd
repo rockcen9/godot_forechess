@@ -2,7 +2,10 @@ extends Node2D
 
 const BOARD_SIZE := 16
 var board_tiles: Array[Array] = []
-var tile_scene := preload("res://scenes/BoardTile.tscn")
+var tile_scene: PackedScene = preload("res://scenes/BoardTile.tscn")
+
+func _ready() -> void:
+	init_board()
 
 func init_board():
 	for x in BOARD_SIZE:
