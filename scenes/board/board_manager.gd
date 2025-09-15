@@ -76,3 +76,18 @@ func connect_player_mode_signals(callback: Callable) -> void:
 		var player = players[player_id]
 		if player:
 			player.player_mode_changed.connect(callback)
+
+func get_all_enemies() -> Array:
+	return enemies.values()
+
+func remove_enemy(enemy: Enemy) -> void:
+	# Find and remove the enemy from the enemies dictionary
+	for enemy_id in enemies.keys():
+		if enemies[enemy_id] == enemy:
+			enemies.erase(enemy_id)
+			break
+
+	# Remove the enemy from the scene tree
+	if enemy.get_parent():
+		enemy.get_parent().remove_child(enemy)
+	enemy.queue_free()

@@ -2,7 +2,8 @@ extends Node
 
 enum TurnPhase {
 	PLAYER_DECISION,
-	PLAYER_MOVE
+	PLAYER_MOVE,
+	PLAYER_ATTACK
 }
 
 signal turn_phase_changed(new_phase: TurnPhase)
@@ -61,9 +62,13 @@ func start_player_move_phase() -> void:
 	# Execute all player movements
 	execute_player_movements()
 
-	# Return to decision phase after movement
+	# Check if any players are in attack mode to proceed to attack phase
 	await get_tree().create_timer(1.0).timeout # Brief pause to see movement
-	start_player_decision_phase()
+
+	if has_players_in_attack_mode():
+		start_player_attack_phase()
+	else:
+		start_player_decision_phase()
 
 func start_player_decision_phase() -> void:
 	current_phase = TurnPhase.PLAYER_DECISION
@@ -85,6 +90,8 @@ func update_phase_display() -> void:
 				phase_label.text = "Phase: PlayerDecision"
 			TurnPhase.PLAYER_MOVE:
 				phase_label.text = "Phase: PlayerMove"
+			TurnPhase.PLAYER_ATTACK:
+				phase_label.text = "Phase: PlayerAttack"
 	update_status_display()
 
 func update_status_display() -> void:
@@ -137,3 +144,87 @@ func _on_player_mode_changed(player_id: int, new_mode) -> void:
 func update_modes_display() -> void:
 	if player_modes_label:
 		player_modes_label.text = "P1 Mode: " + player_modes[1] + " | P2 Mode: " + player_modes[2]
+
+func start_player_attack_phase() -> void:
+	current_phase = TurnPhase.PLAYER_ATTACK
+	turn_phase_changed.emit(current_phase)
+	update_phase_display()
+	print("Entering PlayerAttack phase")
+
+	# Execute all player attacks
+	execute_player_attacks()
+
+	# Return to decision phase after attacks
+	await get_tree().create_timer(1.0).timeout # Brief pause to see attack effects
+	start_player_decision_phase()
+
+func has_players_in_attack_mode() -> bool:
+	# Check if any players are in attack mode and have locked shooting indicators
+	for player_id in [1, 2]:
+		var player = board_manager.get_player(player_id)
+		if player and player.get_current_mode() == 1: # PlayerMode.ATTACK
+			if player.shooting_indicator and player.shooting_indicator.is_indicator_locked():
+				return true
+	return false
+
+func execute_player_attacks() -> void:
+	# Execute attacks for all players in attack mode with locked indicators
+	for player_id in [1, 2]:
+		var player = board_manager.get_player(player_id)
+		if player and player.get_current_mode() == 1: # PlayerMode.ATTACK
+			if player.shooting_indicator and player.shooting_indicator.is_indicator_locked():
+				perform_player_attack(player)
+
+func perform_player_attack(player: Player) -> void:
+	print("Player ", player.player_id, " performing attack")
+
+	# Get shooting line from player position and rotation
+	var start_pos = Vector2(player.grid_x, player.grid_y)
+	var shooting_direction = Vector2.from_angle(player.shooting_indicator.rotation)
+
+	# Find enemies hit by the shooting line
+	var enemies_hit = find_enemies_on_line(start_pos, shooting_direction)
+
+	# Deal damage to hit enemies
+	for enemy in enemies_hit:
+		damage_enemy(enemy, 50)
+
+func find_enemies_on_line(start_pos: Vector2, direction: Vector2) -> Array:
+	var hit_enemies = []
+	var enemies = board_manager.get_all_enemies()
+
+	for enemy in enemies:
+		var enemy_pos = Vector2(enemy.grid_x, enemy.grid_y)
+
+		# Check if enemy is on the shooting line
+		if is_point_on_line(start_pos, direction, enemy_pos):
+			hit_enemies.append(enemy)
+
+	return hit_enemies
+
+func is_point_on_line(line_start: Vector2, line_direction: Vector2, point: Vector2) -> bool:
+	# Calculate vector from line start to point
+	var to_point = point - line_start
+
+	# Check if point is in front of the line (positive projection)
+	var projection = to_point.dot(line_direction.normalized())
+	if projection <= 0:
+		return false
+
+	# Calculate perpendicular distance from point to line
+	var perpendicular_distance = abs(to_point.cross(line_direction.normalized()))
+
+	# Consider hit if within 0.5 units of the line (tolerance for grid-based game)
+	return perpendicular_distance < 0.5
+
+func damage_enemy(enemy: Enemy, damage: int) -> void:
+	print("Damaging enemy at (", enemy.grid_x, ", ", enemy.grid_y, ") for ", damage, " damage")
+	enemy.take_damage(damage)
+
+	# Check if enemy should be destroyed
+	if enemy.get_health() <= 0:
+		destroy_enemy(enemy)
+
+func destroy_enemy(enemy: Enemy) -> void:
+	print("Destroying enemy at (", enemy.grid_x, ", ", enemy.grid_y, ")")
+	board_manager.remove_enemy(enemy)
