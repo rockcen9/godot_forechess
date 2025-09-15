@@ -9,6 +9,7 @@ enum TurnPhase {
 }
 
 var restart_dialog_scene: PackedScene = preload("res://scenes/ui/RestartDialog.tscn")
+var pause_menu_scene: PackedScene = preload("res://scenes/ui/PauseMenu.tscn")
 
 signal turn_phase_changed(new_phase: TurnPhase)
 
@@ -335,14 +336,6 @@ func check_player_death(enemy_positions: Array) -> bool:
 
 	return false
 
-func show_game_over_dialog() -> void:
-	print("GAME OVER - Player died!")
-
-	# Create and show restart dialog
-	var restart_dialog = restart_dialog_scene.instantiate()
-	restart_dialog.restart_requested.connect(_on_restart_requested)
-	get_tree().current_scene.add_child(restart_dialog)
-	restart_dialog.show_dialog()
 
 func _on_restart_requested() -> void:
 	restart_game()
@@ -356,12 +349,26 @@ func restart_game() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):  # ESC key
-		show_restart_dialog()
+		show_pause_menu()
 
-func show_restart_dialog() -> void:
-	print("Showing restart dialog...")
+func show_pause_menu() -> void:
+	print("Showing pause menu...")
 
-	# Create and show restart dialog
+	# Create and show pause menu
+	var pause_menu = pause_menu_scene.instantiate()
+	pause_menu.resume_requested.connect(_on_resume_requested)
+	pause_menu.restart_requested.connect(_on_restart_requested)
+	get_tree().current_scene.add_child(pause_menu)
+	pause_menu.show_pause_menu()
+
+func _on_resume_requested() -> void:
+	print("Resuming game...")
+	get_tree().paused = false
+
+func show_game_over_dialog() -> void:
+	print("GAME OVER - Player died!")
+
+	# Create and show restart dialog (for game over)
 	var restart_dialog = restart_dialog_scene.instantiate()
 	restart_dialog.restart_requested.connect(_on_restart_requested)
 	get_tree().current_scene.add_child(restart_dialog)
