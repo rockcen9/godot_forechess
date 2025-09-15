@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://bjxe2l8wnkah"
-path="res://.godot/imported/fast_drop.wav-46f8454123f6654c7b5e21d7edbd76b6.sample"
+path="res://.godot/imported/fast_drop.wav-620f7269ef0c347dd81ab87c2b653aa1.sample"
 
 [deps]
 
-source_file="res://assets/audio/fast_drop.wav"
-dest_files=["res://.godot/imported/fast_drop.wav-46f8454123f6654c7b5e21d7edbd76b6.sample"]
+source_file="res://assets/audio/effects/fast_drop.wav"
+dest_files=["res://.godot/imported/fast_drop.wav-620f7269ef0c347dd81ab87c2b653aa1.sample"]
 
 [params]
 
