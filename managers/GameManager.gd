@@ -51,6 +51,7 @@ func _ready() -> void:
 	# Connect to EventBus events
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.player_died.connect(_on_player_died)
+	EventBus.player_confirmed_action.connect(_on_player_confirmed_action)
 
 # Initialization function called by main scene
 func initialize(managers: Dictionary, ui_nodes: Dictionary, scene_nodes: Dictionary) -> void:
@@ -400,3 +401,12 @@ func _on_game_started() -> void:
 func _on_player_died(player: Node, cause: String) -> void:
 	print("GameManager: Player died event received - ", cause)
 	end_game("player_death")
+
+func _on_player_confirmed_action(player: Node) -> void:
+	if current_phase == TurnPhase.PLAYER_DECISION and player:
+		var player_id = player.player_id
+		if player.get_current_mode() == 1: # ATTACK mode
+			player_confirmations[player_id] = true
+			print("GameManager: Player ", player_id, " attack confirmed via EventBus")
+			update_status_display()
+			check_all_players_ready()
