@@ -41,9 +41,9 @@ var player_modes: Dictionary = {
 	2: "Move"
 }
 
-# Scene preloads
-var restart_dialog_scene: PackedScene = preload("res://ui/RestartDialog.tscn")
-var pause_menu_scene: PackedScene = preload("res://ui/PauseMenu.tscn")
+# Scene preloads (commented out for now)
+# var restart_dialog_scene: PackedScene = preload("res://ui/RestartDialog.tscn")
+# var pause_menu_scene: PackedScene = preload("res://ui/PauseMenu.tscn")
 
 func _ready() -> void:
 	print("GameManager initialized")
@@ -364,18 +364,20 @@ func _input(event: InputEvent) -> void:
 # Game over and pause dialogs
 func show_game_over_dialog() -> void:
 	print("GameManager: GAME OVER - Player died!")
-	var restart_dialog = restart_dialog_scene.instantiate()
-	restart_dialog.restart_requested.connect(_on_restart_requested)
-	get_tree().current_scene.add_child(restart_dialog)
-	restart_dialog.show_dialog()
+	# TODO: Implement restart dialog
+	# var restart_dialog = restart_dialog_scene.instantiate()
+	# restart_dialog.restart_requested.connect(_on_restart_requested)
+	# get_tree().current_scene.add_child(restart_dialog)
+	# restart_dialog.show_dialog()
 
 func show_pause_menu() -> void:
 	print("GameManager: Showing pause menu")
-	var pause_menu = pause_menu_scene.instantiate()
-	pause_menu.resume_requested.connect(_on_resume_requested)
-	pause_menu.restart_requested.connect(_on_restart_requested)
-	get_tree().current_scene.add_child(pause_menu)
-	pause_menu.show_pause_menu()
+	# TODO: Implement pause menu
+	# var pause_menu = pause_menu_scene.instantiate()
+	# pause_menu.resume_requested.connect(_on_resume_requested)
+	# pause_menu.restart_requested.connect(_on_restart_requested)
+	# get_tree().current_scene.add_child(pause_menu)
+	# pause_menu.show_pause_menu()
 
 func _on_restart_requested() -> void:
 	restart_game()

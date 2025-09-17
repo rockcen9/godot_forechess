@@ -315,3 +315,28 @@ func get_debug_info() -> Dictionary:
 		"target_location": target_location,
 		"ai_threat": get_ai_threat_level()
 	}
+
+# Target selection method needed by board manager
+func select_target_player(available_players: Array) -> void:
+	# Simple target selection - closest player
+	if available_players.is_empty():
+		target_player_id = -1
+		return
+
+	var closest_player = null
+	var closest_distance = INF
+
+	for player in available_players:
+		if not player:
+			continue
+
+		var distance = Vector2i(grid_x, grid_y).distance_to(Vector2i(player.grid_x, player.grid_y))
+		if distance < closest_distance:
+			closest_distance = distance
+			closest_player = player
+
+	if closest_player:
+		target_player_id = closest_player.player_id
+		print("Enemy ", enemy_id, " selected target: Player ", target_player_id)
+	else:
+		target_player_id = -1
