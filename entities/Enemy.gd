@@ -296,7 +296,6 @@ func apply_status_effect(effect_name: String, duration: int) -> void:
 func destroy() -> void:
 	# Clean up when enemy is destroyed
 	hide_target_gizmo()
-	EventBus.enemy_died.emit(self)
 	queue_free()
 
 # Debug functions

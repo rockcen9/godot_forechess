@@ -51,6 +51,7 @@ func _ready() -> void:
 	# Connect to EventBus events
 	EventBus.game_started.connect(_on_game_started)
 	EventBus.player_died.connect(_on_player_died)
+	EventBus.enemy_died.connect(_on_enemy_died)
 	EventBus.player_confirmed_action.connect(_on_player_confirmed_action)
 
 # Initialization function called by main scene
@@ -410,3 +411,15 @@ func _on_player_confirmed_action(player: Node) -> void:
 			print("GameManager: Player ", player_id, " attack confirmed via EventBus")
 			update_status_display()
 			check_all_players_ready()
+
+func _on_enemy_died(enemy: Node) -> void:
+	print("GameManager: Enemy ", enemy.enemy_id, " died - destroying entity")
+
+	# Request sound effect for enemy death
+	EventBus.request_audio("effect", "enemy_death", Vector2(enemy.grid_x, enemy.grid_y))
+
+	# Remove enemy from scene after a brief delay to allow any death effects
+	await get_tree().create_timer(0.1).timeout
+
+	if is_instance_valid(enemy):
+		enemy.queue_free()

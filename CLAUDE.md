@@ -135,6 +135,125 @@ The project follows a **composition-over-inheritance** pattern:
 - **EventBus**: Only for cross-cutting global events that span multiple systems
 - **Component interfaces**: Well-defined APIs for component interaction
 
+## Manager Architecture Guidelines
+
+### Core Principle: Avoid God Objects
+
+* Use **composition only** — no inheritance, no interfaces.
+* Managers must **stay small, focused, and modular**.
+* Avoid creating a single **God Object** that knows or does everything.
+
+### Manager Design Rules
+
+#### 1. Single Responsibility
+* Each Manager must handle **one major concern only**.
+* Example:
+  * `InputManager` → input collection
+  * `CombatManager` → damage resolution
+  * `AIManager` → AI scheduling / tools
+  * `AudioManager` → sound / music
+
+#### 2. Keep Managers Slim
+* If a Manager grows beyond ~500 lines, split it into sub-services.
+* Example:
+  * Instead of a bloated `AIManager`:
+    * `AIManager` (dispatcher)
+    * `PathfindingService`
+    * `DecisionService`
+
+#### 3. Prefer Composition Over Switches
+* Avoid giant `if/else` or `match` inside Managers.
+* Use **controllers and behaviors**:
+  * `AIController` holds an array of `AIBehavior` resources.
+  * Example: `ChaseBehavior`, `PatrolBehavior`, `FleeBehavior`.
+* Managers should **call controllers**, not encode all behaviors.
+
+#### 4. Event-Driven Decoupling
+* Use an **EventBus** (global signals) to broadcast results.
+* Example:
+  * `CombatManager` → `EventBus.emit("player_damaged", amount)`
+  * `UIManager` subscribes and updates health bar.
+* This keeps Managers from hard-coding dependencies.
+
+#### 5. Data-Driven Logic
+* Managers should read config from **Resources (.gd + .tres)**.
+* Avoid writing type checks like `if enemy.type == "chaser"`.
+* Example:
+  * `EnemyData.tres` specifies behaviors: `[ChaseBehavior, PatrolBehavior]`.
+  * AIController loads these and executes.
+
+#### 6. Entities Stay Lightweight
+* Entities (Player, Enemy, NPC) should:
+  * Store state (`health`, `speed`).
+  * Delegate control to a **Controller** (`InputController`, `AIController`, `NetworkController`).
+  * Respond to Manager calls (`take_damage()`).
+
+#### 7. Execution Order Controlled Centrally
+* `GameManager` decides update order in `_physics_process`:
+  ```
+  InputManager → AIManager → Movement → CombatManager → Animation/FX
+  ```
+* Other Managers **must not** assume their own order; they are called centrally.
+
+#### 8. Explicit APIs
+* Each Manager must expose **clear public methods**.
+* Example:
+  * `CombatManager.deal_damage(attacker, target, amount)`
+  * `AIManager.get_direction_for(entity, ai_type)`
+* No hidden dependencies.
+
+#### 9. Avoid Cross-Manager Coupling
+* Managers must **not** directly call each other unless necessary.
+* Prefer EventBus or GameManager coordination.
+* Example:
+  * `CombatManager` should not directly call `AudioManager`.
+  * Instead: `EventBus.emit("attack_hit")`, AudioManager reacts.
+
+#### 10. Testability
+* Managers should be replaceable with dummy versions in tests.
+* Example: `DummyCombatManager` that logs damage instead of applying it.
+* This prevents single bugs from crashing the entire project.
+
+### Anti-Patterns (Do Not Do)
+* One giant `GameManager` that handles input, AI, combat, audio, UI all in one.
+* Hard-coded type checks like `if enemy.type == "boss"`.
+* Managers that directly update UI or play sounds (delegate via EventBus).
+* Entity scripts that bypass Managers and handle their own logic.
+
+### Example: Good vs Bad
+
+**Bad (God Object AIManager):**
+```gdscript
+func update(delta):
+    for enemy in enemies:
+        if enemy.type == "chaser":
+            chase_player(enemy)
+        elif enemy.type == "ranger":
+            shoot_arrow(enemy)
+        elif enemy.type == "boss":
+            boss_phase(enemy)
+```
+
+**Good (Composition with Behaviors):**
+```gdscript
+# AIManager.gd
+func update(delta):
+    for enemy in get_tree().get_nodes_in_group("enemy"):
+        enemy.controller.update(enemy, delta)
+
+# AIController.gd
+@export var behaviors: Array[Resource]
+func update(owner, delta):
+    for b in behaviors:
+        owner.velocity += b.get_direction(owner, delta)
+```
+
+### Summary
+* Managers = global services, but must stay **focused**.
+* Use **composition (controllers + behaviors)**, not inheritance.
+* Drive logic with **Resources + EventBus**.
+* Keep Entities thin, Managers modular, and GameManager as the orchestrator.
+
 ## Development Notes
 
 - The project implements a turn-based chess variant with tactical combat elements
