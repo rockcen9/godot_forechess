@@ -43,7 +43,7 @@ var player_modes: Dictionary = {
 }
 
 # Scene preloads
-# var restart_dialog_scene: PackedScene = preload("res://ui/RestartDialog.tscn")
+var restart_dialog_scene: PackedScene = preload("res://ui/ui/RestartDialog.tscn")
 var pause_menu_scene: PackedScene = preload("res://ui/ui/PauseMenu.tscn")
 
 func _ready() -> void:
@@ -160,6 +160,9 @@ func start_player_move_phase() -> void:
 	# Execute all player movements
 	execute_player_movements()
 
+	# Reset confirmations after movement to prevent repeated move phases
+	reset_player_confirmations()
+
 	# Move to enemy move phase after player movement
 	await get_tree().create_timer(1.0).timeout
 	start_enemy_move_phase()
@@ -216,6 +219,11 @@ func _on_player_confirmed(player_id: int) -> void:
 			player_confirmed_directions[player_id] = input_manager.get_player_direction_vector(player_id)
 
 		print("GameManager: Player ", player_id, " confirmed with direction: ", player_confirmed_directions[player_id])
+
+		# Sync with PlayerManager
+		if player_manager:
+			player_manager.set_player_confirmation(player_id, true, player_confirmed_directions[player_id])
+
 		update_status_display()
 		check_all_players_ready()
 
@@ -223,6 +231,11 @@ func _on_player_cancelled(player_id: int) -> void:
 	if current_phase == TurnPhase.PLAYER_DECISION:
 		player_confirmations[player_id] = false
 		print("GameManager: Player ", player_id, " cancelled confirmation")
+
+		# Sync with PlayerManager
+		if player_manager:
+			player_manager.set_player_confirmation(player_id, false)
+
 		update_status_display()
 	else:
 		print("GameManager: Player ", player_id, " cancellation ignored - not in decision phase")
@@ -338,11 +351,15 @@ func _input(event: InputEvent) -> void:
 # Game over and pause dialogs
 func show_game_over_dialog() -> void:
 	print("GameManager: GAME OVER - Player died!")
-	# TODO: Implement restart dialog
-	# var restart_dialog = restart_dialog_scene.instantiate()
-	# restart_dialog.restart_requested.connect(_on_restart_requested)
-	# get_tree().current_scene.add_child(restart_dialog)
-	# restart_dialog.show_dialog()
+
+	# Play game over sound effect
+	EventBus.request_audio("effect", "game_over", Vector2.ZERO)
+
+	# Show restart dialog
+	var restart_dialog = restart_dialog_scene.instantiate()
+	restart_dialog.restart_requested.connect(_on_restart_requested)
+	get_tree().current_scene.add_child(restart_dialog)
+	restart_dialog.show_dialog()
 
 func show_pause_menu() -> void:
 	print("GameManager: Showing pause menu")
@@ -397,7 +414,11 @@ func _on_enemy_died(enemy: Node) -> void:
 # New event handlers for PlayerManager integration
 func _on_all_players_ready() -> void:
 	print("GameManager: All players ready event received from PlayerManager")
-	start_player_move_phase()
+	# Only transition to move phase if we're currently in decision phase
+	if current_phase == TurnPhase.PLAYER_DECISION:
+		start_player_move_phase()
+	else:
+		print("GameManager: Ignoring all players ready - not in decision phase (current: ", current_phase, ")")
 
 func _on_player_status_changed(player_id: int, status_data: Dictionary) -> void:
 	print("GameManager: Player ", player_id, " status changed: ", status_data)

@@ -24,7 +24,14 @@ func _ready() -> void:
 
 func initialize(player_node: Node) -> void:
 	player_entity = player_node
-	player_id = player_node.player_id if player_node.has_method("get_player_id") else 0
+	# Try property first, then method
+	if "player_id" in player_node:
+		player_id = player_node.player_id
+	elif player_node.has_method("get_player_id"):
+		player_id = player_node.get_player_id()
+	else:
+		player_id = 0
+		print("PlayerController: Warning - Could not get player_id from ", player_node)
 
 	# Connect to player's mode changes if available
 	if player_entity.has_signal("mode_changed"):

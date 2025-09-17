@@ -44,7 +44,14 @@ func discover_and_register_players() -> void:
 			register_player(player)
 
 func register_player(player: Node) -> void:
-	var player_id = player.player_id if player.has_method("get") else 0
+	var player_id = 0
+	# Try property first, then method
+	if "player_id" in player:
+		player_id = player.player_id
+	elif player.has_method("get_player_id"):
+		player_id = player.get_player_id()
+	else:
+		print("PlayerManager: Warning - Could not get player_id from ", player)
 
 	if player_id == 0:
 		print("PlayerManager: Cannot register player with invalid ID")
@@ -158,10 +165,12 @@ func execute_player_movement(player_id: int, direction: Vector2i) -> bool:
 
 	# Try to execute movement through board manager
 	if board_manager and board_manager.has_method("move_player"):
-		success = board_manager.move_player(player_id, direction)
+		var result = board_manager.move_player(player_id, direction)
+		success = result if result != null else false
 	else:
 		# Fallback to controller movement
-		success = controller.execute_movement(direction)
+		var result = controller.execute_movement(direction)
+		success = result if result != null else false
 
 	if success:
 		var new_pos = controller.get_position()
