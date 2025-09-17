@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://be8yno3xg2v4u"]
 
-[ext_resource type="Script" uid="uid://dckcoo3t4vxby" path="res://scenes/player/player.gd" id="1_script"]
+[ext_resource type="Script" path="res://entities/Player.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://bwdmivp3tdiep" path="res://assets/textures/units/player/soldier.png" id="2_texture"]
 
 [node name="Player" type="Node2D"]

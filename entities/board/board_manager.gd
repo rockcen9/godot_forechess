@@ -2,9 +2,9 @@ extends Node2D
 
 const BOARD_SIZE := 8
 var board_tiles: Array[Array] = []
-var tile_scene: PackedScene = preload("res://scenes/board/BoardTile.tscn")
-var player_scene: PackedScene = preload("res://scenes/player/Player.tscn")
-var enemy_scene: PackedScene = preload("res://scenes/enemy/Enemy.tscn")
+var tile_scene: PackedScene = preload("res://entities/board/BoardTile.tscn")
+var player_scene: PackedScene = preload("res://entities/player/Player.tscn")
+var enemy_scene: PackedScene = preload("res://entities/enemy/Enemy.tscn")
 var players: Dictionary = {}
 var enemies: Dictionary = {}
 
@@ -73,10 +73,10 @@ func spawn_enemy_king() -> void:
 	# Initialize enemy target selection
 	initialize_enemy_targets()
 
-func get_player(player_id: int) -> Player:
+func get_player(player_id: int) -> Node:
 	return players.get(player_id, null)
 
-func get_enemy(enemy_id: int) -> Enemy:
+func get_enemy(enemy_id: int) -> Node:
 	return enemies.get(enemy_id, null)
 
 func connect_player_mode_signals(callback: Callable) -> void:
@@ -89,7 +89,7 @@ func connect_player_mode_signals(callback: Callable) -> void:
 func get_all_enemies() -> Array:
 	return enemies.values()
 
-func remove_enemy(enemy: Enemy) -> void:
+func remove_enemy(enemy: Node) -> void:
 	# Find and remove the enemy from the enemies dictionary
 	for enemy_id in enemies.keys():
 		if enemies[enemy_id] == enemy:

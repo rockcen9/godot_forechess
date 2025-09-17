@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ddcnl7y7kkstw"]
 
-[ext_resource type="Script" uid="uid://dghmnxdnus1fl" path="res://scenes/ui/restart_dialog.gd" id="1_x8t3d"]
+[ext_resource type="Script" uid="uid://dghmnxdnus1fl" path="res://ui/ui/restart_dialog.gd" id="1_x8t3d"]
 
 [node name="RestartDialog" type="Control"]
 layout_mode = 3
