@@ -41,9 +41,9 @@ var player_modes: Dictionary = {
 	2: "Move"
 }
 
-# Scene preloads (commented out for now)
+# Scene preloads
 # var restart_dialog_scene: PackedScene = preload("res://ui/RestartDialog.tscn")
-# var pause_menu_scene: PackedScene = preload("res://ui/PauseMenu.tscn")
+var pause_menu_scene: PackedScene = preload("res://ui/ui/PauseMenu.tscn")
 
 func _ready() -> void:
 	print("GameManager initialized")
@@ -211,6 +211,8 @@ func _on_player_cancelled(player_id: int) -> void:
 		player_confirmations[player_id] = false
 		print("GameManager: Player ", player_id, " cancelled confirmation")
 		update_status_display()
+	else:
+		print("GameManager: Player ", player_id, " cancellation ignored - not in decision phase")
 
 func check_all_players_ready() -> void:
 	# Check if all players have confirmed their actions
@@ -372,12 +374,11 @@ func show_game_over_dialog() -> void:
 
 func show_pause_menu() -> void:
 	print("GameManager: Showing pause menu")
-	# TODO: Implement pause menu
-	# var pause_menu = pause_menu_scene.instantiate()
-	# pause_menu.resume_requested.connect(_on_resume_requested)
-	# pause_menu.restart_requested.connect(_on_restart_requested)
-	# get_tree().current_scene.add_child(pause_menu)
-	# pause_menu.show_pause_menu()
+	var pause_menu = pause_menu_scene.instantiate()
+	pause_menu.resume_requested.connect(_on_resume_requested)
+	pause_menu.restart_requested.connect(_on_restart_requested)
+	get_tree().current_scene.add_child(pause_menu)
+	pause_menu.show_pause_menu()
 
 func _on_restart_requested() -> void:
 	restart_game()

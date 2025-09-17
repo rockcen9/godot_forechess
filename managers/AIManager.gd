@@ -171,7 +171,7 @@ func apply_decision_to_enemy(enemy: Node, decision: Dictionary) -> void:
 # Execute enemy movements based on decisions
 func execute_enemy_movements(enemies: Array) -> Array[Vector2i]:
 	print("AIManager: Executing enemy movements")
-	var enemy_positions = []
+	var enemy_positions: Array[Vector2i] = []
 
 	for enemy in enemies:
 		if not enemy or not enemy.is_alive():

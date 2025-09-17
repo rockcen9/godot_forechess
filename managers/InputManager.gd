@@ -42,6 +42,10 @@ func _input(event: InputEvent) -> void:
 	if not input_enabled:
 		return
 
+	# Skip ui_cancel (ESC) - let GameManager handle pause menu
+	if event.is_action_pressed("ui_cancel"):
+		return
+
 	# Handle keyboard input for testing
 	if event is InputEventKey and event.pressed:
 		handle_keyboard_input(event)
@@ -89,7 +93,7 @@ func handle_keyboard_input(event: InputEventKey) -> void:
 			emit_player_confirmed(player_id)
 			return
 		# Cancel buttons
-		KEY_ESCAPE:
+		KEY_C:
 			player_id = 1
 			emit_player_cancelled(player_id)
 			return
