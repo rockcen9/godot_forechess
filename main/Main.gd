@@ -9,6 +9,7 @@ var input_manager: Node
 var ai_manager: Node
 var combat_manager: Node
 var audio_manager: Node
+var player_manager: Node
 
 # Scene nodes
 @onready var board_manager: Node2D = $BoardManager
@@ -45,6 +46,7 @@ func initialize_managers() -> void:
 	var AIManagerScript = load("res://managers/AIManager.gd")
 	var CombatManagerScript = load("res://managers/CombatManager.gd")
 	var AudioManagerScript = load("res://managers/AudioManager.gd")
+	var PlayerManagerScript = load("res://managers/PlayerManager.gd")
 
 	# Create manager instances
 	game_manager = GameManagerScript.new()
@@ -67,6 +69,10 @@ func initialize_managers() -> void:
 	audio_manager.name = "AudioManager"
 	add_child(audio_manager)
 
+	player_manager = PlayerManagerScript.new()
+	player_manager.name = "PlayerManager"
+	add_child(player_manager)
+
 func setup_manager_dependencies() -> void:
 	print("Main: Setting up manager dependencies")
 
@@ -81,7 +87,8 @@ func initialize_game_manager() -> void:
 		"input_manager": input_manager,
 		"ai_manager": ai_manager,
 		"combat_manager": combat_manager,
-		"audio_manager": audio_manager
+		"audio_manager": audio_manager,
+		"player_manager": player_manager
 	}
 
 	# Prepare UI references
@@ -215,6 +222,8 @@ func get_manager(manager_name: String) -> Node:
 			return combat_manager
 		"audio":
 			return audio_manager
+		"player_manager":
+			return player_manager
 		_:
 			return null
 

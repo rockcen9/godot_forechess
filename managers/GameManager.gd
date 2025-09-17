@@ -29,6 +29,7 @@ var player_confirmed_directions: Dictionary = {
 var input_manager: InputManager
 var ai_manager: AIManager
 var combat_manager: CombatManager
+var player_manager: PlayerManager
 var board_manager: Node2D  # Reference to BoardManager in scene
 
 # UI references
@@ -62,6 +63,7 @@ func initialize(managers: Dictionary, ui_nodes: Dictionary, scene_nodes: Diction
 	input_manager = managers.get("input_manager")
 	ai_manager = managers.get("ai_manager")
 	combat_manager = managers.get("combat_manager")
+	player_manager = managers.get("player_manager")
 	board_manager = scene_nodes.get("board_manager")
 
 	# Store UI references
@@ -73,6 +75,15 @@ func initialize(managers: Dictionary, ui_nodes: Dictionary, scene_nodes: Diction
 	if input_manager:
 		input_manager.player_confirmed.connect(_on_player_confirmed)
 		input_manager.player_cancelled.connect(_on_player_cancelled)
+
+	# Connect to player manager signals
+	if player_manager:
+		player_manager.all_players_ready.connect(_on_all_players_ready)
+		player_manager.player_status_changed.connect(_on_player_status_changed)
+
+	# Initialize player manager with board reference
+	if player_manager and board_manager:
+		player_manager.initialize(board_manager)
 
 	# Connect to player mode changes through board manager
 	if board_manager and board_manager.has_method("connect_player_mode_signals"):
@@ -217,51 +228,18 @@ func _on_player_cancelled(player_id: int) -> void:
 		print("GameManager: Player ", player_id, " cancellation ignored - not in decision phase")
 
 func check_all_players_ready() -> void:
-	# Check if all players have confirmed their actions
-	var all_confirmed = true
-	for pid in [1, 2]:
-		if not board_manager:
-			continue
-
-		var player = board_manager.get_player(pid)
-		if player:
-			if player.get_current_mode() == 1: # ATTACK mode
-				# For attack mode, check if shooting indicator is locked
-				if not (player.shooting_indicator and player.shooting_indicator.is_indicator_locked()):
-					all_confirmed = false
-					break
-			else: # PlayerMode.MOVE
-				# For move mode, check if move is confirmed
-				if not player_confirmations[pid]:
-					all_confirmed = false
-					break
-
-	print("GameManager: All players ready - ", all_confirmed)
-	if all_confirmed:
+	# Delegate readiness check to player manager
+	if player_manager and player_manager.are_all_players_ready():
+		print("GameManager: All players ready via PlayerManager")
 		EventBus.all_players_ready.emit()
 		start_player_move_phase()
 
 func execute_player_movements() -> void:
 	print("GameManager: Executing player movements")
 
-	if not board_manager:
-		return
-
-	for player_id in [1, 2]:
-		if player_confirmations[player_id]:
-			var player = board_manager.get_player(player_id)
-			if player and player.get_current_mode() == 1: # ATTACK mode
-				print("Player ", player_id, " is in attack mode - skipping movement")
-				continue
-
-			var direction = player_confirmed_directions[player_id]
-			board_manager.move_player(player_id, direction)
-
-			# Emit movement event
-			if player:
-				EventBus.player_moved.emit(player,
-					Vector2i(player.grid_x - direction.x, player.grid_y - direction.y),
-					Vector2i(player.grid_x, player.grid_y))
+	# Delegate to player manager for cleaner separation
+	if player_manager:
+		player_manager.execute_player_movements()
 
 func reset_player_confirmations() -> void:
 	# Reset confirmation state for new turn
@@ -270,26 +248,18 @@ func reset_player_confirmations() -> void:
 	player_confirmed_directions[1] = Vector2i.ZERO
 	player_confirmed_directions[2] = Vector2i.ZERO
 
-	# Reset player confirmation states through board manager
-	if board_manager:
-		for player_id in [1, 2]:
-			var player = board_manager.get_player(player_id)
-			if player and player.has_method("reset_confirmation_state"):
-				player.reset_confirmation_state()
+	# Delegate to player manager instead of direct entity access
+	if player_manager:
+		player_manager.reset_all_player_confirmations()
 
 # Utility functions
 func is_decision_phase() -> bool:
 	return current_phase == TurnPhase.PLAYER_DECISION
 
 func has_players_in_attack_mode() -> bool:
-	if not board_manager:
-		return false
-
-	for player_id in [1, 2]:
-		var player = board_manager.get_player(player_id)
-		if player and player.get_current_mode() == 1: # ATTACK mode
-			if player.shooting_indicator and player.shooting_indicator.is_indicator_locked():
-				return true
+	# Delegate to player manager
+	if player_manager:
+		return player_manager.has_players_in_attack_mode()
 	return false
 
 func check_player_death_collisions(enemy_positions: Array) -> bool:
@@ -423,3 +393,18 @@ func _on_enemy_died(enemy: Node) -> void:
 
 	if is_instance_valid(enemy):
 		enemy.queue_free()
+
+# New event handlers for PlayerManager integration
+func _on_all_players_ready() -> void:
+	print("GameManager: All players ready event received from PlayerManager")
+	start_player_move_phase()
+
+func _on_player_status_changed(player_id: int, status_data: Dictionary) -> void:
+	print("GameManager: Player ", player_id, " status changed: ", status_data)
+
+	# Update local confirmation tracking
+	if "confirmed" in status_data:
+		player_confirmations[player_id] = status_data.confirmed
+
+	# Update UI displays
+	update_status_display()
