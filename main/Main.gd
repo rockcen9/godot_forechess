@@ -12,7 +12,7 @@ var audio_manager: Node
 
 # Scene nodes
 @onready var board_manager: Node2D = $BoardManager
-@onready var ui_container: Control = $UI
+@onready var ui_container: CanvasLayer = $UI
 
 # UI nodes
 @onready var phase_label: Label = $UI/PhaseLabel

@@ -221,7 +221,7 @@ func check_all_players_ready() -> void:
 
 		var player = board_manager.get_player(pid)
 		if player:
-			if player.get_current_mode() == Player.PlayerMode.ATTACK:
+			if player.get_current_mode() == 1: # ATTACK mode
 				# For attack mode, check if shooting indicator is locked
 				if not (player.shooting_indicator and player.shooting_indicator.is_indicator_locked()):
 					all_confirmed = false
@@ -246,7 +246,7 @@ func execute_player_movements() -> void:
 	for player_id in [1, 2]:
 		if player_confirmations[player_id]:
 			var player = board_manager.get_player(player_id)
-			if player and player.get_current_mode() == Player.PlayerMode.ATTACK:
+			if player and player.get_current_mode() == 1: # ATTACK mode
 				print("Player ", player_id, " is in attack mode - skipping movement")
 				continue
 
@@ -283,7 +283,7 @@ func has_players_in_attack_mode() -> bool:
 
 	for player_id in [1, 2]:
 		var player = board_manager.get_player(player_id)
-		if player and player.get_current_mode() == Player.PlayerMode.ATTACK:
+		if player and player.get_current_mode() == 1: # ATTACK mode
 			if player.shooting_indicator and player.shooting_indicator.is_indicator_locked():
 				return true
 	return false
@@ -343,9 +343,9 @@ func update_status_display() -> void:
 func _on_player_mode_changed(player_id: int, new_mode) -> void:
 	# Update player mode display
 	match new_mode:
-		Player.PlayerMode.MOVE:
+		0: # MOVE mode
 			player_modes[player_id] = "Move"
-		Player.PlayerMode.ATTACK:
+		1: # ATTACK mode
 			player_modes[player_id] = "Attack"
 		_:
 			player_modes[player_id] = "Unknown"
@@ -394,6 +394,6 @@ func restart_game() -> void:
 func _on_game_started() -> void:
 	print("GameManager: Game started event received")
 
-func _on_player_died(player: Player, cause: String) -> void:
+func _on_player_died(player: Node, cause: String) -> void:
 	print("GameManager: Player died event received - ", cause)
 	end_game("player_death")
