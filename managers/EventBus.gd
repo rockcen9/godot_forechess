@@ -12,24 +12,24 @@ signal game_resumed()
 signal game_restarted()
 
 # Turn System Events
-signal turn_phase_changed(new_phase: GameManager.TurnPhase)
+signal turn_phase_changed(new_phase: int)
 signal player_turn_started(player_id: int)
 signal enemy_turn_started()
 signal all_players_ready()
 
 # Player Events
-signal player_spawned(player: Player)
-signal player_died(player: Player, cause: String)
-signal player_moved(player: Player, from_pos: Vector2i, to_pos: Vector2i)
-signal player_mode_changed(player: Player, new_mode: Player.PlayerMode)
-signal player_confirmed_action(player: Player)
-signal player_cancelled_action(player: Player)
+signal player_spawned(player: Node)
+signal player_died(player: Node, cause: String)
+signal player_moved(player: Node, from_pos: Vector2i, to_pos: Vector2i)
+signal player_mode_changed(player: Node, new_mode: int)
+signal player_confirmed_action(player: Node)
+signal player_cancelled_action(player: Node)
 
 # Enemy Events
-signal enemy_spawned(enemy: Enemy)
-signal enemy_died(enemy: Enemy)
-signal enemy_moved(enemy: Enemy, from_pos: Vector2i, to_pos: Vector2i)
-signal enemy_targeted_player(enemy: Enemy, target_player: Player)
+signal enemy_spawned(enemy: Node)
+signal enemy_died(enemy: Node)
+signal enemy_moved(enemy: Node, from_pos: Vector2i, to_pos: Vector2i)
+signal enemy_targeted_player(enemy: Node, target_player: Node)
 
 # Combat Events
 signal damage_applied(target: Node, damage: int, source: Node)
@@ -51,7 +51,7 @@ func _ready() -> void:
 
 # Helper functions for common event patterns
 
-func notify_player_action(player: Player, action: String, data: Dictionary = {}) -> void:
+func notify_player_action(player: Node, action: String, data: Dictionary = {}) -> void:
 	print("EventBus: Player ", player.player_id, " performed action: ", action)
 	# Can be extended for more specific player action events
 
